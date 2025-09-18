@@ -1,0 +1,10 @@
+release: python manage.py migrate
+{%- if use_async == "y" %}
+web: gunicorn config.asgi:application -k uvicorn_worker.UvicornWorker
+{%- else %}
+web: gunicorn config.wsgi:application
+{%- endif %}
+{%- if use_celery == "y" %}
+worker: REMAP_SIGTERM=SIGQUIT celery -A config.celery_app worker --loglevel=info
+beat: REMAP_SIGTERM=SIGQUIT celery -A config.celery_app beat --loglevel=info
+{%- endif %}

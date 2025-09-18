@@ -1,0 +1,47 @@
+dist: focal
+
+language: python
+python:
+  - "3.12"
+
+services:
+  - {% if use_docker == 'y' %}docker{% else %}postgresql{% endif %}
+jobs:
+  include:
+    - name: "Linter"
+      before_script:
+        - pip install -q ruff
+      script:
+        - ruff check .
+
+    - name: "Django Test"
+    {%- if use_docker == 'y' %}
+      before_script:
+        - docker compose -v
+        - docker -v
+        - docker compose -f docker-compose.local.yml build
+        - docker compose -f docker-compose.docs.yml build
+        # Ensure celerybeat does not crash due to non-existent tables
+        - docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
+        - docker compose -f docker-compose.local.yml up -d
+      script:
+        - docker compose -f docker-compose.local.yml run django pytest
+      after_failure:
+        - docker compose -f docker-compose.local.yml logs
+    {%- else %}
+      before_install:
+        - sudo apt-get update -qq
+        - sudo apt-get install -qq build-essential gettext python-dev zlib1g-dev libpq-dev xvfb
+        - sudo apt-get install -qq libjpeg8-dev libfreetype6-dev libwebp-dev
+        - sudo apt-get install -qq graphviz-dev python-setuptools python3-dev python-virtualenv python-pip
+        - sudo apt-get install -qq firefox automake libtool libreadline6 libreadline6-dev libreadline-dev
+        - sudo apt-get install -qq libsqlite3-dev libxml2 libxml2-dev libssl-dev libbz2-dev wget curl llvm
+      language: python
+      python:
+        - "3.12"
+      install:
+        - pip install uv
+        - uv sync
+      script:
+        - uv run pytest
+    {%- endif %}

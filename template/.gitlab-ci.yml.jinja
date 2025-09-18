@@ -1,0 +1,51 @@
+stages:
+  - lint
+  - test
+
+variables:
+  POSTGRES_USER: '{{ project_slug }}'
+  POSTGRES_PASSWORD: ''
+  POSTGRES_DB: 'test_{{ project_slug }}'
+  POSTGRES_HOST_AUTH_METHOD: trust
+  {%- if use_celery == 'y' %}
+  REDIS_URL: 'redis://redis:6379/0'
+  {%- endif %}
+
+precommit:
+  stage: lint
+  image: ghcr.io/astral-sh/uv:python3.12
+  variables:
+    PRE_COMMIT_HOME: ${CI_PROJECT_DIR}/.cache/pre-commit
+  cache:
+    paths:
+      - ${PRE_COMMIT_HOME}
+  before_script:
+    - uv pip install -q pre-commit pre-commit-uv
+  script:
+    - uv run pre-commit run --show-diff-on-failure --color=always --all-files
+
+pytest:
+  stage: test
+  {%- if use_docker == 'y' %}
+  image: docker:25.0
+  services:
+    - docker:dind
+  before_script:
+    - docker compose -f docker-compose.local.yml build
+    - docker compose -f docker-compose.docs.yml build
+    # Ensure celerybeat does not crash due to non-existent tables
+    - docker compose -f docker-compose.local.yml run --rm django python manage.py migrate
+    - docker compose -f docker-compose.local.yml up -d
+  script:
+    - docker compose -f docker-compose.local.yml run django pytest
+  {%- else %}
+  image: ghcr.io/astral-sh/uv:python3.12
+  services:
+    - postgres:{{ postgresql_version }}
+  variables:
+    DATABASE_URL: pgsql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres/$POSTGRES_DB
+  before_script:
+    - uv sync --locked
+  script:
+    - uv run pytest
+  {%- endif %}

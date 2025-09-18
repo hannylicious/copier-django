@@ -1,0 +1,46 @@
+# Config for Dependabot updates. See Documentation here:
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+enable-beta-ecosystems: true
+updates:
+  # Update Python deps for the template (not the generated project)
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "project infrastructure"
+
+  # Update GitHub actions in workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "project infrastructure"
+
+  # Update npm packages
+  - package-ecosystem: "npm"
+    directories:
+      - "{{project_slug}}/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "update"
+
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directories:
+      - "{{project_slug}}/compose/local/django/"
+      - "{{project_slug}}/compose/local/docs/"
+      - "{{project_slug}}/compose/production/django/"
+      - "{{project_slug}}/compose/local/node/"
+      - "{{project_slug}}/compose/production/aws/"
+      - "{{project_slug}}/compose/production/postgres/"
+      - "{{project_slug}}/compose/production/nginx/"
+      - "{{project_slug}}/compose/production/traefik/"
+    schedule:
+      interval: "daily"
+    labels:
+      - "update"

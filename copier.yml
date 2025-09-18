@@ -1,0 +1,168 @@
+# ---
+# META
+# ---
+
+_jinja_extensions:
+  - jinja2_time.TimeExtension
+_min_copier_version: "9.10.0"
+_secret_questions:
+  - django_secret_key
+_subdirectory: template
+
+# ---
+# GENERAL
+# ---
+
+project_name:
+  type: str
+  default: "My Project"
+  help: The name of your project.
+project_slug:
+  type: str
+  default: "{{ project_name.lower()|replace(' ', '_')|replace('-', '_')|replace('.', '_')|trim() }}"
+  help: The slug for your project, used in directory and file names.
+description:
+  type: str
+  default: "Welcome To My Project!"
+  help: A short description of the project.
+author_name:
+  type: str
+  default: "John Doe"
+  help: The name of the project's author.
+django_secret_key:
+  type: str
+  default: "!!!change_this_secret_key!!!"
+  help: The secret key for Django
+  secret: true
+domain_name:
+  type: str
+  default: "example.com"
+  help: The domain name for the project.
+email:
+  type: str
+  default: "{{ author_name.lower() | trim() |replace(' ', '-') }}@{{ domain_name.lower() | trim() }}"
+  help: The author's email address.
+version:
+  type: str
+  default: "0.1.0"
+  help: The initial version of the project.
+open_source_license:
+  type: str
+  choices:
+    - "MIT"
+    - "BSD"
+    - "GPLv3"
+    - "Apache Software License 2.0"
+    - "Not open source"
+  help: Choose a license for your project.
+username_type:
+  type: str
+  choices:
+    - "username"
+    - "email"
+  help: How do users log in?
+timezone:
+  type: str
+  default: "America/Chicago"
+  help: The timezone for the project's settings.
+windows:
+  type: bool
+  default: false
+  help: Set to true if you need Windows compatibility.
+use_docker:
+  type: bool
+  default: true
+  help: Use Docker for development and deployment?
+postgresql_version:
+  type: str
+  choices:
+    - "17"
+    - "16"
+    - "15"
+    - "14"
+  help: Select the PostgreSQL version for your project.
+cloud_provider:
+  type: str
+  choices:
+    - "AWS"
+    - "GCP"
+    - "Azure"
+    - "None"
+  help: Choose your cloud provider.
+mail_service:
+  type: str
+  choices:
+    - "Mailgun"
+    - "Amazon SES"
+    - "Mailjet"
+    - "Mandrill"
+    - "Postmark"
+    - "Sendgrid"
+    - "Brevo"
+    - "SparkPost"
+    - "Other SMTP"
+  help: Select a mail service for your project.
+frontend_pipeline:
+  type: str
+  choices:
+    - "None"
+    - "Django Compressor"
+    - "Gulp"
+    - "Webpack"
+  help: How do you want to manage your frontend assets?
+use_async:
+  type: bool
+  default: false
+  help: Do you want to use async features in Django?
+use_drf:
+  type: bool
+  default: false
+  help: Include Django Rest Framework (DRF)?
+use_django-ninja:
+  type: bool
+  default: false
+  help: Include Django Ninja?
+use_celery:
+  type: bool
+  default: false
+  help: Use Celery for background tasks?
+use_mailpit:
+  type: bool
+  default: true
+  help: Use Mailpit for local email testing?
+use_sentry:
+  type: bool
+  default: true
+  help: Use Sentry SDK for error tracking?
+use_whitenoise:
+  type: bool
+  default: true
+  help: Use Whitenoise to serve static files?
+editor:
+  type: str
+  choices:
+    - "None"
+    - "PyCharm"
+    - "VS Code"
+  help: Which code editor do you use?
+ci_tool:
+  type: str
+  choices:
+    - "None"
+    - "Travis"
+    - "Gitlab"
+    - "Github"
+    - "Drone"
+  help: Which continuous integration tool do you prefer?
+use_heroku:
+  type: bool
+  default: false
+  help: Deploy to Heroku?
+keep_local_envs_in_vcs:
+  type: bool
+  default: false
+  help: Keep local environment files in version control?
+debug:
+  type: bool
+  default: false
+  help: Enable debug mode by default?
