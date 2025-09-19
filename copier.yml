@@ -15,6 +15,17 @@ _exclude:
   - "{% if open_source_license != 'GPLV3' %}COPYING{% endif %}"
   - "{% if username_type != 'username' %}{{project_slug}}/users/tests/test_managers.py{% endif %}"
   - "{% if username_type != 'username' %}{{project_slug}}/users/managers.py{% endif %}"
+  - "{% if use_docker %}utility{% endif %}"
+  - "{% if use_docker and cloud_provider == 'none' %}compose/production/nginx{% endif %}"
+  - "{% if not use_docker %}.devcontainer{% endif %}"
+  - "{% if not use_docker %}compose{% endif %}"
+  - "{% if not use_docker %}docker-compose.local.yml{% endif %}"
+  - "{% if not use_docker %}docker-compose.production.yml{% endif %}"
+  - "{% if not use_docker %}.dockerignore{% endif %}"
+  - "{% if not use_docker %}justfile{% endif %}"
+  - "{% if not use_docker and editor == 'PyCharm' %}.idea/runConfigurations/docker_compose_up_django.xml{% endif %}"
+  - "{% if not use_docker and editor == 'PyCharm' %}.idea/runConfigurations/docker_compose_up_docs.xml{% endif %}"
+
 # ---
 # GENERAL
 # ---

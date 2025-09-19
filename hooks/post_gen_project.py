@@ -24,52 +24,6 @@ SUCCESS = "\x1b[1;32m [SUCCESS]: "
 DEBUG_VALUE = "debug"
 
 
-def remove_open_source_files():
-    file_names = ["CONTRIBUTORS.txt", "LICENSE"]
-    for file_name in file_names:
-        Path(file_name).unlink()
-
-
-def remove_gplv3_files():
-    file_names = ["COPYING"]
-    for file_name in file_names:
-        Path(file_name).unlink()
-
-
-def remove_custom_user_manager_files():
-    users_path = Path("{{cookiecutter.project_slug}}", "users")
-    (users_path / "managers.py").unlink()
-    (users_path / "tests" / "test_managers.py").unlink()
-
-
-def remove_pycharm_files():
-    idea_dir_path = Path(".idea")
-    if idea_dir_path.exists():
-        shutil.rmtree(idea_dir_path)
-
-    docs_dir_path = Path("docs", "pycharm")
-    if docs_dir_path.exists():
-        shutil.rmtree(docs_dir_path)
-
-
-def remove_docker_files():
-    shutil.rmtree(".devcontainer")
-    shutil.rmtree("compose")
-
-    file_names = [
-        "docker-compose.local.yml",
-        "docker-compose.production.yml",
-        ".dockerignore",
-        "justfile",
-    ]
-    for file_name in file_names:
-        Path(file_name).unlink()
-    if "{{ cookiecutter.editor }}" == "PyCharm":
-        file_names = ["docker_compose_up_django.xml", "docker_compose_up_docs.xml"]
-        for file_name in file_names:
-            Path(".idea", "runConfigurations", file_name).unlink()
-
-
 def remove_nginx_docker_files():
     shutil.rmtree(Path("compose", "production", "nginx"))
 
@@ -81,7 +35,10 @@ def remove_utility_files():
 def remove_heroku_files():
     file_names = ["Procfile"]
     for file_name in file_names:
-        if file_name == "requirements.txt" and "{{ cookiecutter.ci_tool }}".lower() == "travis":
+        if (
+            file_name == "requirements.txt"
+            and "{{ cookiecutter.ci_tool }}".lower() == "travis"
+        ):
             # Don't remove the file if we are using Travis CI but not using Heroku
             continue
         Path(file_name).unlink()
@@ -104,13 +61,17 @@ def remove_webpack_files():
 
 
 def remove_vendors_js():
-    vendors_js_path = Path("{{ cookiecutter.project_slug }}", "static", "js", "vendors.js")
+    vendors_js_path = Path(
+        "{{ cookiecutter.project_slug }}", "static", "js", "vendors.js"
+    )
     if vendors_js_path.exists():
         vendors_js_path.unlink()
 
 
 def remove_project_css():
-    project_css_path = Path("{{ cookiecutter.project_slug }}", "static", "css", "project.css")
+    project_css_path = Path(
+        "{{ cookiecutter.project_slug }}", "static", "css", "project.css"
+    )
     if project_css_path.exists():
         project_css_path.unlink()
 
@@ -181,7 +142,9 @@ def handle_js_runner(choice, use_docker, use_async):
         ]
         if not use_docker:
             dev_django_cmd = (
-                "uvicorn config.asgi:application --reload" if use_async else "python manage.py runserver_plus"
+                "uvicorn config.asgi:application --reload"
+                if use_async
+                else "python manage.py runserver_plus"
             )
             scripts.update(
                 {
@@ -252,7 +215,9 @@ def remove_dotdrone_file():
     Path(".drone.yml").unlink()
 
 
-def generate_random_string(length, using_digits=False, using_ascii_letters=False, using_punctuation=False):  # noqa: FBT002
+def generate_random_string(
+    length, using_digits=False, using_ascii_letters=False, using_punctuation=False
+):  # noqa: FBT002
     """
     Example:
         opting out for 50 symbol-long, [a-z][A-Z][0-9] string
@@ -372,14 +337,22 @@ def set_flags_in_envs(postgres_user, celery_flower_user, debug=False):  # noqa: 
     set_django_admin_url(production_django_envs_path)
 
     set_postgres_user(local_postgres_envs_path, value=postgres_user)
-    set_postgres_password(local_postgres_envs_path, value=DEBUG_VALUE if debug else None)
+    set_postgres_password(
+        local_postgres_envs_path, value=DEBUG_VALUE if debug else None
+    )
     set_postgres_user(production_postgres_envs_path, value=postgres_user)
-    set_postgres_password(production_postgres_envs_path, value=DEBUG_VALUE if debug else None)
+    set_postgres_password(
+        production_postgres_envs_path, value=DEBUG_VALUE if debug else None
+    )
 
     set_celery_flower_user(local_django_envs_path, value=celery_flower_user)
-    set_celery_flower_password(local_django_envs_path, value=DEBUG_VALUE if debug else None)
+    set_celery_flower_password(
+        local_django_envs_path, value=DEBUG_VALUE if debug else None
+    )
     set_celery_flower_user(production_django_envs_path, value=celery_flower_user)
-    set_celery_flower_password(production_django_envs_path, value=DEBUG_VALUE if debug else None)
+    set_celery_flower_password(
+        production_django_envs_path, value=DEBUG_VALUE if debug else None
+    )
 
 
 def set_flags_in_settings_files():
@@ -422,31 +395,19 @@ def main():  # noqa: C901, PLR0912, PLR0915
     )
     set_flags_in_settings_files()
 
-    if "{{ cookiecutter.open_source_license }}" == "Not open source":
-        remove_open_source_files()
-    if "{{ cookiecutter.open_source_license}}" != "GPLv3":
-        remove_gplv3_files()
-
-    if "{{ cookiecutter.username_type }}" == "username":
-        remove_custom_user_manager_files()
-
-    if "{{ cookiecutter.editor }}" != "PyCharm":
-        remove_pycharm_files()
-
-    if "{{ cookiecutter.use_docker }}".lower() == "y":
-        remove_utility_files()
-        if "{{ cookiecutter.cloud_provider }}".lower() != "none":
-            remove_nginx_docker_files()
-    else:
-        remove_docker_files()
-
-    if "{{ cookiecutter.use_docker }}".lower() == "y" and "{{ cookiecutter.cloud_provider}}" != "AWS":
+    if (
+        "{{ cookiecutter.use_docker }}".lower() == "y"
+        and "{{ cookiecutter.cloud_provider}}" != "AWS"
+    ):
         remove_aws_dockerfile()
 
     if "{{ cookiecutter.use_heroku }}".lower() == "n":
         remove_heroku_files()
 
-    if "{{ cookiecutter.use_docker }}".lower() == "n" and "{{ cookiecutter.use_heroku }}".lower() == "n":
+    if (
+        "{{ cookiecutter.use_docker }}".lower() == "n"
+        and "{{ cookiecutter.use_heroku }}".lower() == "n"
+    ):
         if "{{ cookiecutter.keep_local_envs_in_vcs }}".lower() == "y":
             print(
                 INFO + ".env(s) are only utilized when Docker Compose and/or "
@@ -476,7 +437,10 @@ def main():  # noqa: C901, PLR0912, PLR0915
             use_async=("{{ cookiecutter.use_async }}".lower() == "y"),
         )
 
-    if "{{ cookiecutter.cloud_provider }}" == "None" and "{{ cookiecutter.use_docker }}".lower() == "n":
+    if (
+        "{{ cookiecutter.cloud_provider }}" == "None"
+        and "{{ cookiecutter.use_docker }}".lower() == "n"
+    ):
         print(
             WARNING + "You chose to not use any cloud providers nor Docker, "
             "media files won't be served in production." + TERMINATOR,
@@ -543,14 +507,20 @@ def setup_dependencies():
 
     # Install production dependencies
     try:
-        subprocess.run([*uv_cmd, "add", "--no-sync", "-r", "requirements/production.txt"], check=True)  # noqa: S603
+        subprocess.run(
+            [*uv_cmd, "add", "--no-sync", "-r", "requirements/production.txt"],
+            check=True,
+        )  # noqa: S603
     except subprocess.CalledProcessError as e:
         print(f"Error installing production dependencies: {e}", file=sys.stderr)
         sys.exit(1)
 
     # Install local (development) dependencies
     try:
-        subprocess.run([*uv_cmd, "add", "--no-sync", "--dev", "-r", "requirements/local.txt"], check=True)  # noqa: S603
+        subprocess.run(
+            [*uv_cmd, "add", "--no-sync", "--dev", "-r", "requirements/local.txt"],
+            check=True,
+        )  # noqa: S603
     except subprocess.CalledProcessError as e:
         print(f"Error installing local dependencies: {e}", file=sys.stderr)
         sys.exit(1)
