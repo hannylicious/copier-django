@@ -21,6 +21,14 @@ project_slug:
   type: str
   default: "{{ project_name.lower()|replace(' ', '_')|replace('-', '_')|replace('.', '_')|trim() }}"
   help: The slug for your project, used in directory and file names.
+  validator: >-
+    {% if not project_slug.isidentifier() %}
+      This is not a valid Python identifier.
+    {% elif project_slug in ['False', 'None', 'True', 'and', 'as', 'assert', 'async', 'await', 'break', 'class', 'continue', 'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global', 'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return', 'try', 'while', 'with', 'yield'] %}
+      This is a Python keyword and cannot be used as an identifier.
+    {% elif not project_slug == project_slug.lower() %}
+      The project slug must be all lowercase.
+    {% endif %}
 description:
   type: str
   default: "Welcome To My Project!"
@@ -29,6 +37,10 @@ author_name:
   type: str
   default: "John Doe"
   help: The name of the project's author.
+  validator: >-
+    {% if "\\" in author_name %}
+      Please do not use backslashes in the author name.
+    {% endif %}
 django_secret_key:
   type: str
   default: "!!!change_this_secret_key!!!"
@@ -38,10 +50,22 @@ domain_name:
   type: str
   default: "example.com"
   help: The domain name for the project.
+  validator: >-
+    {% if domain_name != domain_name.strip() %}
+    The domain name cannot have leading or trailing spaces.
+    {% elif " " in domain_name %}
+    The domain name cannot contain spaces.
+    {% endif %}
 email:
   type: str
   default: "{{ author_name.lower() | trim() |replace(' ', '-') }}@{{ domain_name.lower() | trim() }}"
   help: The author's email address.
+  validator: >-
+    {% if email != email.strip() %}
+    The email cannot have leading or trailing spaces.
+    {% elif " " in email %}
+    The email cannot contain spaces.
+    {% endif %}
 version:
   type: str
   default: "0.1.0"
@@ -101,7 +125,8 @@ mail_service:
     - "Brevo"
     - "SparkPost"
     - "Other SMTP"
-  help: Select a mail service for your project.
+  help: >
+    Select a mail service for your project.
 frontend_pipeline:
   type: str
   choices:
@@ -137,7 +162,13 @@ use_sentry:
 use_whitenoise:
   type: bool
   default: true
-  help: Use Whitenoise to serve static files?
+  help: >
+    Use Whitenoise to serve static files?
+    {% if cloud_provider == "None" %}
+    You have not selected a cloud provider.
+
+      Using whitenoise is highly recommended in this case.
+    {% endif %}
 editor:
   type: str
   choices:
