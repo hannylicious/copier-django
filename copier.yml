@@ -8,6 +8,8 @@ _min_copier_version: "9.10.0"
 _secret_questions:
   - django_secret_key
 _subdirectory: template
+_exclude:
+  - "{% if editor != 'PyCharm' %}.idea/{% endif %}"
 
 # ---
 # GENERAL

@@ -212,6 +212,11 @@ tags
 # in any of the JetBrains IDEs, it makes no sence whatsoever
 # to 'run' anything within it since any particular cookiecutter
 # is declarative by nature.
-.idea/
-
+# Template development - ignore IDE files for the template itself
+# but NOT the .idea/ folder inside template/ directory which is meant to be
+# copied
+/.idea/
 .pytest_cache/
+
+# Don't ignore template/.idea/ - that's meant for generated projects
+!template/.idea/
