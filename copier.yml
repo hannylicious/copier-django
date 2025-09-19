@@ -9,8 +9,12 @@ _secret_questions:
   - django_secret_key
 _subdirectory: template
 _exclude:
-  - "{% if editor != 'PyCharm' %}.idea/{% endif %}"
-
+  - "{% if editor != 'PyCharm' %}.idea{% endif %}"
+  - "{% if open_source_license == 'Not open source' %}LICENSE{% endif %}"
+  - "{% if open_source_license == 'Not open source' %}CONTRIBUTORS.txt{% endif %}"
+  - "{% if open_source_license != 'GPLV3' %}COPYING{% endif %}"
+  - "{% if username_type != 'username' %}{{project_slug}}/users/tests/test_managers.py{% endif %}"
+  - "{% if username_type != 'username' %}{{project_slug}}/users/managers.py{% endif %}"
 # ---
 # GENERAL
 # ---
