@@ -56,7 +56,7 @@ labels: bug
 Logs:
 <details>
 <pre>
-$ cookiecutter https://github.com/cookiecutter/cookiecutter-django
+$ copier https://github.com/hannylicious/copier-django
 project_name [Project Name]: ...
 </pre>
 </details>

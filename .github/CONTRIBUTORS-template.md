@@ -22,9 +22,6 @@ accept and merge pull requests.
   {%- endfor %}
 </table>
 
-_Audrey is also the creator of Cookiecutter. Audrey and Daniel are on
-the Cookiecutter core team._
-
 ## Other Contributors
 
 Listed in alphabetical order.
@@ -45,12 +42,3 @@ Listed in alphabetical order.
   </tr>
   {%- endfor %}
 </table>
-
-### Special Thanks
-
-The following haven't provided code directly, but have provided
-guidance and advice.
-
-- Jannis Leidel
-- Nate Aune
-- Barry Morrison
