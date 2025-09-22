@@ -69,6 +69,14 @@ celerybeat-schedule
 venv/
 ENV/
 
+# .envs unless keep_local_envs_in_vcs
+.env
+.envs/*
+{% if keep_local_envs_in_vcs != 'y' -%}
+!.envs/.local/
+{% endif %}
+
+
 # Rope project settings
 .ropeproject
 

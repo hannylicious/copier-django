@@ -17,6 +17,7 @@ _exclude:
   - "{% if username_type != 'username' %}{{project_slug}}/users/managers.py{% endif %}"
   - "{% if use_docker %}utility{% endif %}"
   - "{% if use_docker and cloud_provider == 'none' %}compose/production/nginx{% endif %}"
+  - "{% if use_docker and cloud_provider != 'AWS' %}/compose/production/aws{% endif %}"
   - "{% if not use_docker %}.devcontainer{% endif %}"
   - "{% if not use_docker %}compose{% endif %}"
   - "{% if not use_docker %}docker-compose.local.yml{% endif %}"
@@ -25,6 +26,33 @@ _exclude:
   - "{% if not use_docker %}justfile{% endif %}"
   - "{% if not use_docker and editor == 'PyCharm' %}.idea/runConfigurations/docker_compose_up_django.xml{% endif %}"
   - "{% if not use_docker and editor == 'PyCharm' %}.idea/runConfigurations/docker_compose_up_docs.xml{% endif %}"
+  - "{% if not use_docker and not use_heroku %}/.envs{% endif %}"
+  - "{% if not use_docker and not use_heroku %}/tests{% endif %}"
+  - "{% if not use_docker and not use_heroku %}merge_production_dotenvs_in_dotenv.py{% endif %}"
+  - "{% if not use_heroku %}Procfile{% endif %}"
+  - "{% if not use_heroku %}/bin{% endif %}"
+  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}gulpfile.mjs{% endif %}"
+  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}/webpack{% endif %}"
+  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}{{project_slug}}/static/js/vendors.js{% endif %}"
+  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}{{project_slug}}/static/sass{% endif %}"
+  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}package.json{% endif %}"
+  - "{% if frontend_pipeline in ['none', 'Django Compressor'] and use_docker %}compose/local/node{% endif %}"
+  - "{% if frontend_pipeline in ['Gulp', 'Webpack'] %}{{project_slug}}/static/css/project.css{% endif %}"
+  - "{% if not use_celery %}config/celery_app.py{% endif %}"
+  - "{% if not use_celery %}{{project_slug}}/users/tasks.py{% endif %}"
+  - "{% if not use_celery %}{{project_slug}}/users/tests/test_tasks.py{% endif %}"
+  - "{% if not use_celery and use_docker %}compose/local/django/celery{% endif %}"
+  - "{% if not use_celery and use_docker %}compose/production/django/celery{% endif %}"
+  - "{% if ci_tool != 'Travis' %}.travis.yml{% endif %}"
+  - "{% if ci_tool != 'Gitlab' %}.gitlab-ci.yml{% endif %}"
+  - "{% if ci_tool != 'Github' %}.github{% endif %}"
+  - "{% if ci_tool != 'Drone' %}.drone.yml{% endif %}"
+  - "{% if not use_drf %}config/api_router.py{% endif %}"
+  - "{% if not use_drf %}{{project_slug}}/users/api{% endif %}"
+  - "{% if not use_drf %}{{project_slug}}/users/tests/api{% endif %}"
+  - "{% if not use_async %}config/asgi.py{% endif %}"
+  - "{% if not use_async %}config/websocket.py{% endif %}"
+  - ""
 
 # ---
 # GENERAL
@@ -87,6 +115,10 @@ version:
   type: str
   default: "0.1.0"
   help: The initial version of the project.
+allow_commits_to_main:
+  type: bool
+  default: false
+  help: Allow commits to the main/master branch (pre-commit hook)?
 open_source_license:
   type: str
   choices:
@@ -129,7 +161,14 @@ cloud_provider:
     - "GCP"
     - "Azure"
     - "None"
-  help: Choose your cloud provider.
+  help: >
+    Choose your cloud provider.
+    {% if cloud_provider == "None" and not use_docker %}
+
+      You chose to not use any cloud providers nor Docker,
+      media files won't be served in production.
+    {% endif %}
+
 mail_service:
   type: str
   choices:
@@ -209,7 +248,14 @@ use_heroku:
 keep_local_envs_in_vcs:
   type: bool
   default: false
-  help: Keep local environment files in version control?
+  help: >
+    Keep local environment files in version control?
+  validator: >-
+    {% if keep_local_envs_in_vcs and not use_docker and not use_heroku %}
+      .env(s) are only utilized when Docker Compose and/or
+      Heroku support is enabled so keeping them does not make sense
+      given your current setup.
+    {% endif %}
 debug:
   type: bool
   default: false

@@ -32,22 +32,6 @@ def remove_utility_files():
     shutil.rmtree("utility")
 
 
-def remove_heroku_files():
-    file_names = ["Procfile"]
-    for file_name in file_names:
-        if (
-            file_name == "requirements.txt"
-            and "{{ cookiecutter.ci_tool }}".lower() == "travis"
-        ):
-            # Don't remove the file if we are using Travis CI but not using Heroku
-            continue
-        Path(file_name).unlink()
-    shutil.rmtree("bin")
-
-
-def remove_sass_files():
-    shutil.rmtree(Path("{{cookiecutter.project_slug}}", "static", "sass"))
-
 
 def remove_gulp_files():
     file_names = ["gulpfile.mjs"]
@@ -68,18 +52,8 @@ def remove_vendors_js():
         vendors_js_path.unlink()
 
 
-def remove_project_css():
-    project_css_path = Path(
-        "{{ cookiecutter.project_slug }}", "static", "css", "project.css"
-    )
-    if project_css_path.exists():
-        project_css_path.unlink()
 
 
-def remove_packagejson_file():
-    file_names = ["package.json"]
-    for file_name in file_names:
-        Path(file_name).unlink()
 
 
 def update_package_json(remove_dev_deps=None, remove_keys=None, scripts=None):
@@ -159,26 +133,6 @@ def handle_js_runner(choice, use_docker, use_async):
         remove_gulp_files()
 
 
-def remove_prettier_pre_commit():
-    remove_repo_from_pre_commit_config("mirrors-prettier")
-
-
-def remove_repo_from_pre_commit_config(repo_to_remove: str):
-    pre_commit_config = Path(".pre-commit-config.yaml")
-    content = pre_commit_config.read_text().splitlines(keepends=True)
-
-    removing = False
-    new_lines = []
-    for line in content:
-        if removing and "- repo:" in line:
-            removing = False
-        if repo_to_remove in line:
-            removing = True
-        if not removing:
-            new_lines.append(line)
-
-    pre_commit_config.write_text("".join(new_lines))
-
 
 def remove_celery_files():
     file_paths = [
@@ -199,20 +153,11 @@ def remove_async_files():
         file_path.unlink()
 
 
-def remove_dottravisyml_file():
-    Path(".travis.yml").unlink()
 
 
-def remove_dotgitlabciyml_file():
-    Path(".gitlab-ci.yml").unlink()
 
 
-def remove_dotgithub_folder():
-    shutil.rmtree(".github")
 
-
-def remove_dotdrone_file():
-    Path(".drone.yml").unlink()
 
 
 def generate_random_string(
@@ -321,12 +266,6 @@ def set_celery_flower_password(file_path, value=None):
     )
 
 
-def append_to_gitignore_file(ignored_line):
-    with Path(".gitignore").open("a") as gitignore_file:
-        gitignore_file.write(ignored_line)
-        gitignore_file.write("\n")
-
-
 def set_flags_in_envs(postgres_user, celery_flower_user, debug=False):  # noqa: FBT002
     local_django_envs_path = Path(".envs", ".local", ".django")
     production_django_envs_path = Path(".envs", ".production", ".django")
@@ -360,29 +299,9 @@ def set_flags_in_settings_files():
     set_django_secret_key(Path("config", "settings", "test.py"))
 
 
-def remove_envs_and_associated_files():
-    shutil.rmtree(".envs")
-    Path("merge_production_dotenvs_in_dotenv.py").unlink()
-    shutil.rmtree("tests")
 
 
-def remove_celery_compose_dirs():
-    shutil.rmtree(Path("compose", "local", "django", "celery"))
-    shutil.rmtree(Path("compose", "production", "django", "celery"))
 
-
-def remove_node_dockerfile():
-    shutil.rmtree(Path("compose", "local", "node"))
-
-
-def remove_aws_dockerfile():
-    shutil.rmtree(Path("compose", "production", "aws"))
-
-
-def remove_drf_starter_files():
-    Path("config", "api_router.py").unlink()
-    shutil.rmtree(Path("{{cookiecutter.project_slug}}", "users", "api"))
-    shutil.rmtree(Path("{{cookiecutter.project_slug}}", "users", "tests", "api"))
 
 
 def main():  # noqa: C901, PLR0912, PLR0915
@@ -395,76 +314,19 @@ def main():  # noqa: C901, PLR0912, PLR0915
     )
     set_flags_in_settings_files()
 
-    if (
-        "{{ cookiecutter.use_docker }}".lower() == "y"
-        and "{{ cookiecutter.cloud_provider}}" != "AWS"
-    ):
-        remove_aws_dockerfile()
-
-    if "{{ cookiecutter.use_heroku }}".lower() == "n":
-        remove_heroku_files()
-
-    if (
-        "{{ cookiecutter.use_docker }}".lower() == "n"
-        and "{{ cookiecutter.use_heroku }}".lower() == "n"
-    ):
-        if "{{ cookiecutter.keep_local_envs_in_vcs }}".lower() == "y":
-            print(
-                INFO + ".env(s) are only utilized when Docker Compose and/or "
-                "Heroku support is enabled so keeping them does not make sense "
-                "given your current setup." + TERMINATOR,
-            )
-        remove_envs_and_associated_files()
-    else:
-        append_to_gitignore_file(".env")
-        append_to_gitignore_file(".envs/*")
-        if "{{ cookiecutter.keep_local_envs_in_vcs }}".lower() == "y":
-            append_to_gitignore_file("!.envs/.local/")
-
     if "{{ cookiecutter.frontend_pipeline }}" in ["None", "Django Compressor"]:
-        remove_gulp_files()
-        remove_webpack_files()
-        remove_sass_files()
-        remove_packagejson_file()
-        remove_prettier_pre_commit()
-        if "{{ cookiecutter.use_docker }}".lower() == "y":
-            remove_node_dockerfile()
     else:
-        remove_project_css()
         handle_js_runner(
             "{{ cookiecutter.frontend_pipeline }}",
             use_docker=("{{ cookiecutter.use_docker }}".lower() == "y"),
             use_async=("{{ cookiecutter.use_async }}".lower() == "y"),
         )
 
-    if (
-        "{{ cookiecutter.cloud_provider }}" == "None"
-        and "{{ cookiecutter.use_docker }}".lower() == "n"
-    ):
-        print(
-            WARNING + "You chose to not use any cloud providers nor Docker, "
-            "media files won't be served in production." + TERMINATOR,
-        )
 
-    if "{{ cookiecutter.use_celery }}".lower() == "n":
-        remove_celery_files()
-        if "{{ cookiecutter.use_docker }}".lower() == "y":
-            remove_celery_compose_dirs()
 
-    if "{{ cookiecutter.ci_tool }}" != "Travis":
-        remove_dottravisyml_file()
 
-    if "{{ cookiecutter.ci_tool }}" != "Gitlab":
-        remove_dotgitlabciyml_file()
 
-    if "{{ cookiecutter.ci_tool }}" != "Github":
-        remove_dotgithub_folder()
 
-    if "{{ cookiecutter.ci_tool }}" != "Drone":
-        remove_dotdrone_file()
-
-    if "{{ cookiecutter.use_drf }}".lower() == "n":
-        remove_drf_starter_files()
 
     if "{{ cookiecutter.use_async }}".lower() == "n":
         remove_async_files()
