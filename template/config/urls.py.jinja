@@ -36,12 +36,14 @@ if settings.DEBUG:
     # Static file serving when using Gunicorn + Uvicorn for local web socket development
     urlpatterns += staticfiles_urlpatterns()
 {%- endif %}
-{% if use_drf == 'y' %}
+{% if use_drf == 'y' or use_django_ninja == 'y' %}
 # API URLS
 urlpatterns += [
     # API base url
     path("api/", include("config.api_router")),
-    # DRF auth token
+{% endif %}
+{% if use_drf == 'y' %}
+    # Auth Token
     path("api/auth-token/", obtain_auth_token, name="obtain_auth_token"),
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(
@@ -49,8 +51,8 @@ urlpatterns += [
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
+{% endif %}
 ]
-{%- endif %}
 
 if settings.DEBUG:
     # This allows the error pages to be debugged during development, just visit

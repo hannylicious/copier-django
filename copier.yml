@@ -85,10 +85,11 @@ _exclude:
   - "{% if ci_tool != 'Gitlab' %}.gitlab-ci.yml{% endif %}"
   - "{% if ci_tool != 'Github' %}.github{% endif %}"
   - "{% if ci_tool != 'Drone' %}.drone.yml{% endif %}"
-  # DJANGO REST FRAMEWORK / NINJA
-  - "{% if not use_drf %}config/api_router.py{% endif %}"
-  - "{% if not use_drf %}{{project_slug}}/users/api{% endif %}"
-  - "{% if not use_drf %}{{project_slug}}/users/tests/api{% endif %}"
+  # DJANGO REST FRAMEWORK / DJANGO NINJA
+  - "{% if not use_drf and not use_django_ninja %}config/api_router.py{% endif %}"
+  - "{% if not use_drf and not use_django_ninja %}{{project_slug}}/users/api{% endif %}"
+  - "{% if not use_drf and not use_django_ninja %}{{project_slug}}/users/tests/api{% endif %}"
+  - "{% if not use_drf and use_django_ninja %}{{project_slug}}/users/api/serializers.py{% endif %}"
   # ASYNC
   - "{% if not use_async %}config/asgi.py{% endif %}"
   # Without async, websockets is not needed
@@ -239,7 +240,7 @@ use_drf:
   type: bool
   default: false
   help: Include Django Rest Framework (DRF)?
-use_django-ninja:
+use_django_ninja:
   type: bool
   default: false
   help: Include Django Ninja?

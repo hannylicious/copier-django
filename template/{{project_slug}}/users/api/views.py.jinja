@@ -1,3 +1,4 @@
+{%- if use_drf == 'y' %}
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin
@@ -28,3 +29,39 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
     def me(self, request):
         serializer = UserSerializer(request.user, context={"request": request})
         return Response(status=status.HTTP_200_OK, data=serializer.data)
+{%- endif %}
+{%- if use_django_ninja %}
+from ninja import Router, Schema
+from ninja.pagination import paginate
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from typing import List
+
+User = get_user_model()
+users_router = Router()
+
+# Response schema
+class UserSchema(Schema):
+    id: int
+{%- if username_type == 'email' %}
+    email: str
+{%- else %}
+    username: str
+{%- endif %}
+    name: str
+
+@users_router.get("/", response=List[UserSchema])
+def list_users(request):
+    return [request.user]
+
+@users_router.get("/{user_id}/", response=UserSchema)
+def get_user(request, user_id: int):
+    if user_id != request.user.id:
+        return {"error": "Permission denied."}
+    return request.user
+
+@users_router.get("/me/", response=UserSchema)
+def get_me(request):
+    return request.user
+{%- endif %}
+

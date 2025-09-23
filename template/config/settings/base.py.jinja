@@ -98,6 +98,9 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "drf_spectacular",
 {%- endif %}
+{%- if use_django_ninja == 'y' %}
+    "ninja",
+{%- endif %}
 {%- if frontend_pipeline == 'Webpack' %}
     "webpack_loader",
 {%- endif %}
