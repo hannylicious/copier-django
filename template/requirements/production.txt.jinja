@@ -4,13 +4,13 @@
 
 gunicorn==23.0.0  # https://github.com/benoitc/gunicorn
 psycopg[c]==3.2.10  # https://github.com/psycopg/psycopg
-{%- if use_whitenoise == 'n'and cloud_provider in ('AWS', 'GCP', 'Azure') %}
+{%- if not use_whitenoise and cloud_provider in ('AWS', 'GCP', 'Azure') %}
 Collectfasta==3.3.1  # https://github.com/jasongi/collectfasta
 {%- endif %}
-{%- if use_sentry == "y" %}
+{%- if use_sentry %}
 sentry-sdk==2.38.0  # https://github.com/getsentry/sentry-python
 {%- endif %}
-{%- if use_docker == "n" and windows == "y" %}
+{%- if not use_docker and windows %}
 hiredis==3.2.1  # https://github.com/redis/hiredis-py
 {%- endif %}
 
