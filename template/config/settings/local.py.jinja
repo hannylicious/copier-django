@@ -30,12 +30,12 @@ CACHES = {
 
 # EMAIL
 # ------------------------------------------------------------------------------
-{% if use_mailpit == 'y' and use_docker == 'y' -%}
+{% if use_mailpit and use_docker -%}
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-host
 EMAIL_HOST = env("EMAIL_HOST", default="mailpit")
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-port
 EMAIL_PORT = 1025
-{%- elif use_mailpit == 'y' and use_docker == 'n' -%}
+{%- elif use_mailpit and not use_docker -%}
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-host
 EMAIL_HOST = "localhost"
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-port
@@ -47,7 +47,7 @@ EMAIL_BACKEND = env(
 )
 {%- endif %}
 
-{%- if use_whitenoise == 'y' %}
+{%- if use_whitenoise %}
 
 # WhiteNoise
 # ------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
 INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
-{% if use_docker == 'y' -%}
+{% if use_docker -%}
 if env("USE_DOCKER") == "yes":
     import socket
 
@@ -87,7 +87,7 @@ if env("USE_DOCKER") == "yes":
         # The node container isn't started (yet?)
         pass
     {%- endif %}
-    {%- if windows == 'y' %}
+    {%- if windows %}
     # RunServerPlus
     # ------------------------------------------------------------------------------
     # This is a custom setting for RunServerPlus to fix reloader issue in Windows docker environment
@@ -102,11 +102,11 @@ if env("USE_DOCKER") == "yes":
 # ------------------------------------------------------------------------------
 # https://django-extensions.readthedocs.io/en/latest/installation_instructions.html#configuration
 INSTALLED_APPS += ["django_extensions"]
-{% if use_celery == 'y' -%}
+{% if use_celery -%}
 
 # Celery
 # ------------------------------------------------------------------------------
-{% if use_docker == 'n' -%}
+{% if not use_docker -%}
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-always-eager
 CELERY_TASK_ALWAYS_EAGER = True
 {%- endif %}

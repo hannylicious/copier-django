@@ -89,6 +89,7 @@ _exclude:
   - "{% if not use_drf and not use_django_ninja %}config/api_router.py{% endif %}"
   - "{% if not use_drf and not use_django_ninja %}{{project_slug}}/users/api{% endif %}"
   - "{% if not use_drf and not use_django_ninja %}{{project_slug}}/users/tests/api{% endif %}"
+  # Django Ninja does not need serializers
   - "{% if not use_drf and use_django_ninja %}{{project_slug}}/users/api/serializers.py{% endif %}"
   # ASYNC
   - "{% if not use_async %}config/asgi.py{% endif %}"
