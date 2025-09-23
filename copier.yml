@@ -12,7 +12,7 @@ _tasks:
   # Set Flags
   - "{{_copier_python}} scripts/set_flags.py"
   # Setup Dependencies
-  - "{{_copier_python}} scripts/{% if use_docker %}setup_docker_dependencies.py{% else %}setup_non_docker_dependencies.py{% endif %}"
+  - "{{_copier_python}} scripts/setup_dependencies.py"
   - "rm -rf scripts"
 _exclude:
   # CODE EDITORS
