@@ -6,7 +6,7 @@ Get Started
 
 Documentation can be written as rst files in `{{project_slug}}/docs`.
 
-{% if use_docker == 'n' %}
+{% if not use_docker %}
 To build and serve docs, use the command::
 
     uv run make livehtml
@@ -37,7 +37,7 @@ To compile all docstrings automatically into documentation source files, use the
 
         uv run make apidocs
 
-{% if use_docker == 'y' %}
+{% if use_docker %}
 This can be done in the docker container:
     ::
 
