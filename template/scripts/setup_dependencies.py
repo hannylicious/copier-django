@@ -23,9 +23,9 @@ SUCCESS = "\x1b[1;32m [SUCCESS]: "
 DEBUG_VALUE = "debug"
 
 
-def setup_dependencies():
+def setup_dependencies(use_docker=False):
     print("Installing python dependencies using uv...")
-    if {{use_docker}}:
+    if use_docker:
         # Build a trimmed down Docker image add dependencies with uv
         uv_docker_image_path = Path("compose/local/uv/Dockerfile")
         uv_image_tag = "copier-django-uv-runner:latest"
@@ -91,8 +91,12 @@ def setup_dependencies():
 
 
 def main():  # noqa: C901, PLR0912, PLR0915
-    setup_dependencies()
-
+    try:
+        use_docker = sys.argv[1]
+        setup_dependencies(use_docker)
+    except IndexError as e:
+        print(f"There was an issue with the use_docker variable. {e}")
+        sys.exit(1)
     print(SUCCESS + "Project initialized, keep up the good work!" + TERMINATOR)
 
 

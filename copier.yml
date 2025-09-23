@@ -12,7 +12,7 @@ _tasks:
   # Set Flags
   - "{{_copier_python}} scripts/set_flags.py"
   # Setup Dependencies
-  - "{{_copier_python}} scripts/setup_dependencies.py"
+  - "{{_copier_python}} scripts/setup_dependencies.py {{use_docker}}"
   - "rm -rf scripts"
 _exclude:
   # CODE EDITORS
@@ -59,17 +59,17 @@ _exclude:
   - "{% if not use_heroku %}/bin{% endif %}"
   # FRONTEND PIPELINE
   # Gulp specific setup / tasks
-  - "{% if frontend_pipeline in ['none', 'Django Compressor', 'Webpack'] %}gulpfile.mjs{% endif %}"
+  - "{% if frontend_pipeline in ['None', 'Django Compressor', 'Webpack'] %}gulpfile.mjs{% endif %}"
   # Webpack specific setup / tasks
-  - "{% if frontend_pipeline in ['none', 'Django Compressor', 'Gulp'] %}/webpack{% endif %}"
+  - "{% if frontend_pipeline in ['None', 'Django Compressor', 'Gulp'] %}/webpack{% endif %}"
   # Imports for popper/bootstrap via webpack
-  - "{% if frontend_pipeline in ['none', 'Django Compressor', 'Gulp'] %}{{project_slug}}/static/js/vendors.js{% endif %}"
+  - "{% if frontend_pipeline in ['None', 'Django Compressor', 'Gulp'] %}{{project_slug}}/static/js/vendors.js{% endif %}"
   # These files require building which only Gulp/Webpack handle (sass/scss)
-  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}{{project_slug}}/static/sass{% endif %}"
+  - "{% if frontend_pipeline in ['None', 'Django Compressor'] %}{{project_slug}}/static/sass{% endif %}"
   # Node requirements only needed by Gulp/Webpack
-  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}package.json{% endif %}"
+  - "{% if frontend_pipeline in ['None', 'Django Compressor'] %}package.json{% endif %}"
   # Node is unnecessary if we are not using Gulp/Webpack
-  - "{% if frontend_pipeline in ['none', 'Django Compressor'] and use_docker %}compose/local/node{% endif %}"
+  - "{% if frontend_pipeline in ['None', 'Django Compressor'] and use_docker %}compose/local/node{% endif %}"
   # These pipelines automatically create this file - not needed in this case
   - "{% if frontend_pipeline in ['Gulp', 'Webpack'] %}{{project_slug}}/static/css/project.css{% endif %}"
   # CELERY
