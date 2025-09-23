@@ -5,17 +5,17 @@ volumes:
   {%- if cloud_provider == 'None' %}
   production_django_media: {}
   {%- endif %}
-  {% if use_celery == 'y' %}
+  {% if use_celery %}
   production_redis_data: {}
   {% endif %}
 
 
 services:
-  django:{% if use_celery == 'y' %} &django{% endif %}
+  django:{% if use_celery %} &django{% endif %}
     build:
       context: .
       dockerfile: ./compose/production/django/Dockerfile
-      {%- if frontend_pipeline == 'Webpack' and use_whitenoise == 'n' %}
+      {%- if frontend_pipeline == 'Webpack' and not use_whitenoise %}
       args:
         # These variable can be defined in an .env file in the root of the repo
         {%- if cloud_provider == 'AWS' %}
@@ -64,19 +64,19 @@ services:
     ports:
       - '0.0.0.0:80:80'
       - '0.0.0.0:443:443'
-      {%- if use_celery == 'y' %}
+      {%- if use_celery %}
       - '0.0.0.0:5555:5555'
       {%- endif %}
 
   redis:
     image: docker.io/redis:6
-    {% if use_celery == 'y' %}
+    {% if use_celery %}
     volumes:
       - production_redis_data:/data
     {% endif %}
 
 
-  {%- if use_celery == 'y' %}
+  {%- if use_celery %}
 
   celeryworker:
     <<: *django

@@ -48,7 +48,7 @@ To run the tests, check your test coverage, and generate an HTML coverage report
 
 Moved to [Live reloading and SASS compilation](https://django.readthedocs.io/en/latest/2-local-development/developing-locally.html#using-webpack-or-gulp).
 
-{%- if use_celery == "y" %}
+{%- if use_celery %}
 
 ### Celery
 
@@ -78,11 +78,11 @@ uv run celery -A config.celery_app worker -B -l info
 ```
 
 {%- endif %}
-{%- if use_mailpit == "y" %}
+{%- if use_mailpit %}
 
 ### Email Server
 
-{%- if use_docker == "y" %}
+{%- if use_docker %}
 
 In development, it is often nice to be able to see emails that are being sent from your application. For that reason local SMTP server [Mailpit](https://github.com/axllent/mailpit) with a web interface is available as docker container.
 
@@ -113,7 +113,7 @@ Now you have your own mail server running locally, ready to receive whatever you
 {%- endif %}
 
 {%- endif %}
-{%- if use_sentry == "y" %}
+{%- if use_sentry %}
 
 ### Sentry
 
@@ -126,14 +126,14 @@ You must set the DSN url in production.
 ## Deployment
 
 The following details how to deploy this application.
-{%- if use_heroku == "y" %}
+{%- if use_heroku %}
 
 ### Heroku
 
 See detailed [django Heroku documentation](https://django.readthedocs.io/en/latest/3-deployment/deployment-on-heroku.html).
 
 {%- endif %}
-{%- if use_docker == "y" %}
+{%- if use_docker %}
 
 ### Docker
 
