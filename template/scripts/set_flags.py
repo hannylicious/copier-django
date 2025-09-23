@@ -1,10 +1,6 @@
 # ruff: noqa: PLR0133
-import json
 import random
-import shutil
 import string
-import subprocess
-import sys
 from pathlib import Path
 
 try:
@@ -22,16 +18,6 @@ HINT = "\x1b[3;33m"
 SUCCESS = "\x1b[1;32m [SUCCESS]: "
 
 DEBUG_VALUE = "debug"
-
-
-def remove_celery_files():
-    file_paths = [
-        Path("config", "celery_app.py"),
-        Path("{{ cookiecutter.project_slug }}", "users", "tasks.py"),
-        Path("{{ cookiecutter.project_slug }}", "users", "tests", "test_tasks.py"),
-    ]
-    for file_path in file_paths:
-        file_path.unlink()
 
 
 def generate_random_string(
@@ -174,7 +160,7 @@ def set_flags_in_settings_files():
 
 
 def main():  # noqa: C901, PLR0912, PLR0915
-    debug = "{{ cookiecutter.debug }}".lower() == "y"
+    debug = "{{ debug }}".lower() == "y"
 
     set_flags_in_envs(
         DEBUG_VALUE if debug else generate_random_user(),
@@ -183,77 +169,7 @@ def main():  # noqa: C901, PLR0912, PLR0915
     )
     set_flags_in_settings_files()
 
-    setup_dependencies()
-
-    print(SUCCESS + "Project initialized, keep up the good work!" + TERMINATOR)
-
-
-def setup_dependencies():
-    print("Installing python dependencies using uv...")
-
-    if "{{ cookiecutter.use_docker }}".lower() == "y":
-        # Build a trimmed down Docker image add dependencies with uv
-        uv_docker_image_path = Path("compose/local/uv/Dockerfile")
-        uv_image_tag = "copier-django-uv-runner:latest"
-        try:
-            subprocess.run(  # noqa: S603
-                [  # noqa: S607
-                    "docker",
-                    "build",
-                    "-t",
-                    uv_image_tag,
-                    "-f",
-                    str(uv_docker_image_path),
-                    "-q",
-                    ".",
-                ],
-                check=True,
-            )
-        except subprocess.CalledProcessError as e:
-            print(f"Error building Docker image: {e}", file=sys.stderr)
-            sys.exit(1)
-
-        # Use Docker to run the uv command
-        uv_cmd = ["docker", "run", "--rm", "-v", ".:/app", uv_image_tag, "uv"]
-    else:
-        # Use uv command directly
-        uv_cmd = ["uv"]
-
-    # Install production dependencies
-    try:
-        subprocess.run(
-            [*uv_cmd, "add", "--no-sync", "-r", "requirements/production.txt"],
-            check=True,
-        )  # noqa: S603
-    except subprocess.CalledProcessError as e:
-        print(f"Error installing production dependencies: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    # Install local (development) dependencies
-    try:
-        subprocess.run(
-            [*uv_cmd, "add", "--no-sync", "--dev", "-r", "requirements/local.txt"],
-            check=True,
-        )  # noqa: S603
-    except subprocess.CalledProcessError as e:
-        print(f"Error installing local dependencies: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    # Remove the requirements directory
-    requirements_dir = Path("requirements")
-    if requirements_dir.exists():
-        try:
-            shutil.rmtree(requirements_dir)
-        except Exception as e:  # noqa: BLE001
-            print(f"Error removing 'requirements' folder: {e}", file=sys.stderr)
-            sys.exit(1)
-
-    uv_image_parent_dir_path = Path("compose/local/uv")
-    if uv_image_parent_dir_path.exists():
-        shutil.rmtree(str(uv_image_parent_dir_path))
-
-    print("Setup complete!")
-
 
 if __name__ == "__main__":
     main()
+

@@ -8,6 +8,12 @@ _min_copier_version: "9.10.0"
 _secret_questions:
   - django_secret_key
 _subdirectory: template
+_tasks:
+  # Set Flags
+  - "{{_copier_python}} scripts/set_flags.py"
+  # Setup Dependencies
+  - "{{_copier_python}} scripts/{% if use_docker %}setup_docker_dependencies.py{% else %}setup_non_docker_dependencies.py{% endif %}"
+  - "rm -rf scripts"
 _exclude:
   # CODE EDITORS
   # Include 'defaults' for PyCharm IDE
