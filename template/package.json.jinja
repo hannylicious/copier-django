@@ -2,16 +2,29 @@
   "name": "{{project_slug}}",
   "version": "{{ version }}",
   "devDependencies": {
+    {% if frontend_pipeline == 'Webpack' %}
     "@babel/core": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
+    {% endif %}
     "@popperjs/core": "^2.10.2",
     "autoprefixer": "^10.4.0",
+    {% if frontend_pipeline == 'Webpack' %}
     "babel-loader": "^10.0.0",
+    {% endif %}
     "bootstrap": "^5.2.3",
+    {% if frontend_pipeline == 'Gulp' %}
     "browser-sync": "^3.0.2",
+    {% endif %}
+    {% if frontend_pipeline == 'Webpack' %}
     "css-loader": "^7.1.2",
+    {% endif %}
+    {% if frontend_pipeline == 'Gulp' %}
     "gulp-concat": "^2.6.1",
+    {% endif %}
+    {% if frontend_pipeline == 'Webpack' and not use_docker %}
     "concurrently": "^9.0.0",
+    {% endif %}
+    {% if frontend_pipeline == 'Gulp' %}
     "cssnano": "^7.0.0",
     "gulp": "^5.0.0",
     "gulp-imagemin": "^9.1.0",
@@ -20,19 +33,26 @@
     "gulp-rename": "^2.0.0",
     "gulp-sass": "^5.0.0",
     "gulp-uglify-es": "^3.0.0",
+    {% endif %}
+    {% if frontend_pipeline == 'Webpack' %}
     "mini-css-extract-plugin": "^2.4.5",
+    {% endif %}
     "node-sass-tilde-importer": "^1.0.2",
     "pixrem": "^5.0.0",
     "postcss": "^8.3.11",
+    {% if frontend_pipeline == 'Webpack' %}
     "postcss-loader": "^8.0.0",
+    {% endif %}
     "postcss-preset-env": "^10.0.3",
     "sass": "1.92.1",
+    {% if frontend_pipeline == 'Webpack' %}
     "sass-loader": "^16.0.1",
     "webpack": "^5.82.0",
     "webpack-bundle-tracker": "^3.0.1",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.0.2",
     "webpack-merge": "^6.0.1"
+    {% endif %}
   },
   "engines": {
     "node": "24.8"
@@ -40,11 +60,31 @@
   "browserslist": [
     "last 2 versions"
   ],
+  {% if frontend_pipeline == 'Webpack' %}
   "babel": {
     "presets": ["@babel/preset-env"]
   },
+  {% endif %}
   "scripts": {
-    "dev": "",
-    "build": ""
+    {% if frontend_pipeline == 'Gulp' %}
+        "dev": "gulp",
+        "build": "gulp build"
+    {% elif frontend_pipeline == 'Webpack' %}
+        {% if use_docker %}
+        "dev": "webpack serve --config webpack/dev.config.js",
+        {% else %}
+        "dev": "concurrently npm:dev:*",
+        "dev:webpack": "webpack serve --config webpack/dev.config.js",
+        {% if use_async %}
+        "dev:django": "uvicorn config.asgi:application --reload"
+        {% else %}
+        "dev:django": "python manage.py runserver_plus"
+        {% endif %}
+        "build": "webpack --config webpack/prod.config.js",
+        {% endif %}
+    {% else %}
+        "dev": "",
+        "build": ""
+    {% endif %}
   }
 }

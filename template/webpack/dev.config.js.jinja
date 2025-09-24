@@ -9,7 +9,7 @@ module.exports = merge(commonConfig, {
     proxy: [
       {
         context: ['/'],
-        {%- if use_docker == 'n' %}
+        {%- if not use_docker %}
         target: 'http://0.0.0.0:8000',
         {%- else %}
         target: 'http://django:8000',

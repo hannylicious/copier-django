@@ -6,7 +6,7 @@ set -o nounset
 
 
 python /app/manage.py collectstatic --noinput
-{% if use_whitenoise == 'y' and frontend_pipeline == 'Django Compressor' %}
+{% if use_whitenoise and frontend_pipeline == 'Django Compressor' %}
 compress_enabled() {
 python << END
 import sys
@@ -27,7 +27,7 @@ if compress_enabled; then
   python /app/manage.py compress
 fi
 {%- endif %}
-{%- if use_async == 'y' %}
+{%- if use_async %}
 exec gunicorn config.asgi --bind 0.0.0.0:5000 --chdir=/app -k uvicorn_worker.UvicornWorker
 {%- else %}
 exec gunicorn config.wsgi --bind 0.0.0.0:5000 --chdir=/app

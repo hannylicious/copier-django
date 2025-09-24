@@ -1,10 +1,10 @@
 # ruff: noqa: E501
-{% if use_sentry == 'y' -%}
+{% if use_sentry -%}
 import logging
 
 import sentry_sdk
 
-{%- if use_celery == 'y' %}
+{%- if use_celery %}
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 {%- endif %}
@@ -113,11 +113,11 @@ AZURE_ACCOUNT_NAME = env("DJANGO_AZURE_ACCOUNT_NAME")
 AZURE_CONTAINER = env("DJANGO_AZURE_CONTAINER_NAME")
 {% endif -%}
 
-{% if cloud_provider != 'None' or use_whitenoise == 'y' -%}
+{% if cloud_provider != 'None' or use_whitenoise -%}
 # STATIC & MEDIA
 # ------------------------
 STORAGES = {
-{%- if use_whitenoise == 'y' and cloud_provider == 'None' %}
+{%- if use_whitenoise and cloud_provider == 'None' %}
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
@@ -132,7 +132,7 @@ STORAGES = {
             "file_overwrite": False,
         },
     },
-    {%- if use_whitenoise == 'y' %}
+    {%- if use_whitenoise %}
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
@@ -153,7 +153,7 @@ STORAGES = {
             "file_overwrite": False,
         },
     },
-    {%- if use_whitenoise == 'y' %}
+    {%- if use_whitenoise %}
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
@@ -174,7 +174,7 @@ STORAGES = {
             "overwrite_files": False,
         },
     },
-    {%- if use_whitenoise == 'y' %}
+    {%- if use_whitenoise %}
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
@@ -192,19 +192,19 @@ STORAGES = {
 
 {%- if cloud_provider == 'AWS' %}
 MEDIA_URL = f"https://{aws_s3_domain}/media/"
-{%- if use_whitenoise == 'n' %}
+{%- if not use_whitenoise %}
 COLLECTFASTA_STRATEGY = "collectfasta.strategies.boto3.Boto3Strategy"
 STATIC_URL = f"https://{aws_s3_domain}/static/"
 {%- endif %}
 {%- elif cloud_provider == 'GCP' %}
 MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/media/"
-{%- if use_whitenoise == 'n' %}
+{%- if not use_whitenoise %}
 COLLECTFASTA_STRATEGY = "collectfasta.strategies.gcloud.GoogleCloudStrategy"
 STATIC_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/static/"
 {%- endif %}
 {%- elif cloud_provider == 'Azure' %}
 MEDIA_URL = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/media/"
-{%- if use_whitenoise == 'n' %}
+{%- if not use_whitenoise %}
 COLLECTFASTA_STRATEGY = "collectfasta.strategies.azure.AzureBlobStrategy"
 STATIC_URL = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/static/"
 {%- endif %}
@@ -305,14 +305,14 @@ COMPRESS_ENABLED = env.bool("COMPRESS_ENABLED", default=True)
 {%- if cloud_provider == 'None' %}
 # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_STORAGE
 COMPRESS_STORAGE = "compressor.storage.GzipCompressorFileStorage"
-{%- elif cloud_provider in ('AWS', 'GCP', 'Azure') and use_whitenoise == 'n' %}
+{%- elif cloud_provider in ('AWS', 'GCP', 'Azure') and not use_whitenoise %}
 # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_STORAGE
 COMPRESS_STORAGE = STORAGES["staticfiles"]["BACKEND"]
 {%- endif %}
 # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_URL
-COMPRESS_URL = STATIC_URL{% if use_whitenoise == 'y' or cloud_provider == 'None' %}  # noqa: F405
+COMPRESS_URL = STATIC_URL{% if use_whitenoise or cloud_provider == 'None' %}  # noqa: F405
 {%- endif -%}
-{%- if use_whitenoise == 'y' %}
+{%- if use_whitenoise %}
 # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_OFFLINE
 COMPRESS_OFFLINE = True  # Offline compression is required when using Whitenoise
 {%- endif %}
@@ -325,7 +325,7 @@ COMPRESS_FILTERS = {
     "js": ["compressor.filters.jsmin.JSMinFilter"],
 }
 {% endif %}
-{%- if use_whitenoise == 'n' and cloud_provider in ('AWS', 'GCP', 'Azure') -%}
+{%- if not use_whitenoise and cloud_provider in ('AWS', 'GCP', 'Azure') -%}
 # Collectfasta
 # ------------------------------------------------------------------------------
 # https://github.com/jasongi/collectfasta#installation
@@ -336,7 +336,7 @@ INSTALLED_APPS = ["collectfasta", *INSTALLED_APPS]
 # https://docs.djangoproject.com/en/dev/ref/settings/#logging
 # See https://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-{% if use_sentry == 'n' -%}
+{% if not use_sentry -%}
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
@@ -418,7 +418,7 @@ sentry_logging = LoggingIntegration(
     event_level=logging.ERROR,  # Send errors as events
 )
 
-{%- if use_celery == 'y' %}
+{%- if use_celery %}
 integrations = [
     sentry_logging,
     DjangoIntegration(),

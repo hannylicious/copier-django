@@ -8,51 +8,94 @@ _min_copier_version: "9.10.0"
 _secret_questions:
   - django_secret_key
 _subdirectory: template
+_tasks:
+  # Set Flags
+  - "{{_copier_python}} scripts/set_flags.py"
+  # Setup Dependencies
+  - "{{_copier_python}} scripts/setup_dependencies.py {{use_docker}}"
+  # Remove scripts directory
+  - "rm -rf scripts"
 _exclude:
+  # CODE EDITORS
+  # Include 'defaults' for PyCharm IDE
   - "{% if editor != 'PyCharm' %}.idea{% endif %}"
+  # If not using docker, we can remove specific docker commands for PyCharm
+  - "{% if not use_docker and editor == 'PyCharm' %}.idea/runConfigurations/docker_compose_up_django.xml{% endif %}"
+  - "{% if not use_docker and editor == 'PyCharm' %}.idea/runConfigurations/docker_compose_up_docs.xml{% endif %}"
+  # LICENSES & CONTRIBUTORS
+  # Not Open Source Projects
   - "{% if open_source_license == 'Not open source' %}LICENSE{% endif %}"
   - "{% if open_source_license == 'Not open source' %}CONTRIBUTORS.txt{% endif %}"
-  - "{% if open_source_license != 'GPLV3' %}COPYING{% endif %}"
+  # GPLv3 Projects
+  - "{% if open_source_license != 'GPLv3' %}COPYING{% endif %}"
+  # MANAGERS (AUTHENTICATION)
   - "{% if username_type != 'username' %}{{project_slug}}/users/tests/test_managers.py{% endif %}"
   - "{% if username_type != 'username' %}{{project_slug}}/users/managers.py{% endif %}"
+  # DOCKER
+  # Handles OS & Python specific dependancies
   - "{% if use_docker %}utility{% endif %}"
+  # Nginx container is for hosting static media; not needed if no cloud
   - "{% if use_docker and cloud_provider == 'none' %}compose/production/nginx{% endif %}"
+  # AWS container is for aws specifics; not needed if not using AWS
   - "{% if use_docker and cloud_provider != 'AWS' %}/compose/production/aws{% endif %}"
+  # .devcontainer is used for setting up docker environments in ide's
   - "{% if not use_docker %}.devcontainer{% endif %}"
+  # Compose stack and other docker related files not needed if not using docker
   - "{% if not use_docker %}compose{% endif %}"
   - "{% if not use_docker %}docker-compose.local.yml{% endif %}"
   - "{% if not use_docker %}docker-compose.production.yml{% endif %}"
   - "{% if not use_docker %}.dockerignore{% endif %}"
+  # TODO: Keep this for other commands?
   - "{% if not use_docker %}justfile{% endif %}"
-  - "{% if not use_docker and editor == 'PyCharm' %}.idea/runConfigurations/docker_compose_up_django.xml{% endif %}"
-  - "{% if not use_docker and editor == 'PyCharm' %}.idea/runConfigurations/docker_compose_up_docs.xml{% endif %}"
+  # If we use heroku or docker, we need the env files; otherwise, we don't
   - "{% if not use_docker and not use_heroku %}/.envs{% endif %}"
+  # Tests specific to merging envs; without envs, this is not needed
   - "{% if not use_docker and not use_heroku %}/tests{% endif %}"
+  # Script to merge env files; without envs, this is not needed
   - "{% if not use_docker and not use_heroku %}merge_production_dotenvs_in_dotenv.py{% endif %}"
+  # HEROKU
+  # Specifies the commands that are executed by the app on startup
   - "{% if not use_heroku %}Procfile{% endif %}"
+  # Contains scripts for the Heroku buildpack (collect static, compress, etc.)
   - "{% if not use_heroku %}/bin{% endif %}"
-  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}gulpfile.mjs{% endif %}"
-  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}/webpack{% endif %}"
-  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}{{project_slug}}/static/js/vendors.js{% endif %}"
-  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}{{project_slug}}/static/sass{% endif %}"
-  - "{% if frontend_pipeline in ['none', 'Django Compressor'] %}package.json{% endif %}"
-  - "{% if frontend_pipeline in ['none', 'Django Compressor'] and use_docker %}compose/local/node{% endif %}"
+  # FRONTEND PIPELINE
+  # Gulp specific setup / tasks
+  - "{% if frontend_pipeline in ['None', 'Django Compressor', 'Webpack'] %}gulpfile.mjs{% endif %}"
+  # Webpack specific setup / tasks
+  - "{% if frontend_pipeline in ['None', 'Django Compressor', 'Gulp'] %}/webpack{% endif %}"
+  # Imports for popper/bootstrap via webpack
+  - "{% if frontend_pipeline in ['None', 'Django Compressor', 'Gulp'] %}{{project_slug}}/static/js/vendors.js{% endif %}"
+  # These files require building which only Gulp/Webpack handle (sass/scss)
+  - "{% if frontend_pipeline in ['None', 'Django Compressor'] %}{{project_slug}}/static/sass{% endif %}"
+  # Node requirements only needed by Gulp/Webpack
+  - "{% if frontend_pipeline in ['None', 'Django Compressor'] %}package.json{% endif %}"
+  # Node is unnecessary if we are not using Gulp/Webpack
+  - "{% if frontend_pipeline in ['None', 'Django Compressor'] and use_docker %}compose/local/node{% endif %}"
+  # These pipelines automatically create this file - not needed in this case
   - "{% if frontend_pipeline in ['Gulp', 'Webpack'] %}{{project_slug}}/static/css/project.css{% endif %}"
+  # CELERY
+  # If we are not using celery, we can remove all related files
   - "{% if not use_celery %}config/celery_app.py{% endif %}"
   - "{% if not use_celery %}{{project_slug}}/users/tasks.py{% endif %}"
   - "{% if not use_celery %}{{project_slug}}/users/tests/test_tasks.py{% endif %}"
+  # If we are not using celery, we can remove the celery container(s)
   - "{% if not use_celery and use_docker %}compose/local/django/celery{% endif %}"
   - "{% if not use_celery and use_docker %}compose/production/django/celery{% endif %}"
+  # CI TOOLS
   - "{% if ci_tool != 'Travis' %}.travis.yml{% endif %}"
   - "{% if ci_tool != 'Gitlab' %}.gitlab-ci.yml{% endif %}"
   - "{% if ci_tool != 'Github' %}.github{% endif %}"
   - "{% if ci_tool != 'Drone' %}.drone.yml{% endif %}"
-  - "{% if not use_drf %}config/api_router.py{% endif %}"
-  - "{% if not use_drf %}{{project_slug}}/users/api{% endif %}"
-  - "{% if not use_drf %}{{project_slug}}/users/tests/api{% endif %}"
+  # DJANGO REST FRAMEWORK / DJANGO NINJA
+  - "{% if not use_drf and not use_django_ninja %}config/api_router.py{% endif %}"
+  - "{% if not use_drf and not use_django_ninja %}{{project_slug}}/users/api{% endif %}"
+  - "{% if not use_drf and not use_django_ninja %}{{project_slug}}/users/tests/api{% endif %}"
+  # Django Ninja does not need serializers
+  - "{% if not use_drf and use_django_ninja %}{{project_slug}}/users/api/serializers.py{% endif %}"
+  # ASYNC
   - "{% if not use_async %}config/asgi.py{% endif %}"
+  # Without async, websockets is not needed
   - "{% if not use_async %}config/websocket.py{% endif %}"
-  - ""
 
 # ---
 # GENERAL
@@ -156,11 +199,12 @@ postgresql_version:
   help: Select the PostgreSQL version for your project.
 cloud_provider:
   type: str
+  default: "None"
   choices:
+    - "None"
     - "AWS"
     - "GCP"
     - "Azure"
-    - "None"
   help: >
     Choose your cloud provider.
     {% if cloud_provider == "None" and not use_docker %}
@@ -185,6 +229,7 @@ mail_service:
     Select a mail service for your project.
 frontend_pipeline:
   type: str
+  default: "None"
   choices:
     - "None"
     - "Django Compressor"
@@ -199,10 +244,11 @@ use_drf:
   type: bool
   default: false
   help: Include Django Rest Framework (DRF)?
-use_django-ninja:
+use_django_ninja:
   type: bool
   default: false
   help: Include Django Ninja?
+  when: "{{ use_drf != true }}"
 use_celery:
   type: bool
   default: false
@@ -227,6 +273,7 @@ use_whitenoise:
     {% endif %}
 editor:
   type: str
+  default: "None"
   choices:
     - "None"
     - "PyCharm"
@@ -234,11 +281,12 @@ editor:
   help: Which code editor do you use?
 ci_tool:
   type: str
+  default: "None"
   choices:
     - "None"
-    - "Travis"
-    - "Gitlab"
     - "Github"
+    - "Gitlab"
+    - "Travis"
     - "Drone"
   help: Which continuous integration tool do you prefer?
 use_heroku:

@@ -1,0 +1,104 @@
+# ruff: noqa: PLR0133
+import random
+import shutil
+import string
+import subprocess
+import sys
+from pathlib import Path
+
+try:
+    # Inspired by
+    # https://github.com/django/django/blob/main/django/utils/crypto.py
+    random = random.SystemRandom()
+    using_sysrandom = True
+except NotImplementedError:
+    using_sysrandom = False
+
+TERMINATOR = "\x1b[0m"
+WARNING = "\x1b[1;33m [WARNING]: "
+INFO = "\x1b[1;33m [INFO]: "
+HINT = "\x1b[3;33m"
+SUCCESS = "\x1b[1;32m [SUCCESS]: "
+
+DEBUG_VALUE = "debug"
+
+
+def setup_dependencies(use_docker=False):
+    print("Installing python dependencies using uv...")
+    if use_docker:
+        # Build a trimmed down Docker image add dependencies with uv
+        uv_docker_image_path = Path("compose/local/uv/Dockerfile")
+        uv_image_tag = "copier-django-uv-runner:latest"
+        try:
+            subprocess.run(  # noqa: S603
+                [  # noqa: S607
+                    "docker",
+                    "build",
+                    "-t",
+                    uv_image_tag,
+                    "-f",
+                    str(uv_docker_image_path),
+                    "-q",
+                    ".",
+                ],
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            print(f"Error building Docker image: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Use Docker to run the uv command
+        uv_cmd = ["docker", "run", "--rm", "-v", ".:/app", uv_image_tag, "uv"]
+        # Install production dependencies
+
+    else:
+        # Use uv command directly
+        uv_cmd = ["uv"]
+
+    try:
+        subprocess.run(
+            [*uv_cmd, "add", "--no-sync", "-r", "requirements/production.txt"],
+            check=True,
+        )  # noqa: S603
+    except subprocess.CalledProcessError as e:
+        print(f"Error installing production dependencies: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # Install local (development) dependencies
+    try:
+        subprocess.run(
+            [*uv_cmd, "add", "--no-sync", "--dev", "-r", "requirements/local.txt"],
+            check=True,
+        )  # noqa: S603
+    except subprocess.CalledProcessError as e:
+        print(f"Error installing local dependencies: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # Remove the requirements directory
+    requirements_dir = Path("requirements")
+    if requirements_dir.exists():
+        try:
+            shutil.rmtree(requirements_dir)
+        except Exception as e:  # noqa: BLE001
+            print(f"Error removing 'requirements' folder: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    uv_image_parent_dir_path = Path("compose/local/uv")
+    if uv_image_parent_dir_path.exists():
+        shutil.rmtree(str(uv_image_parent_dir_path))
+
+    print("Setup complete!")
+
+
+def main():  # noqa: C901, PLR0912, PLR0915
+    try:
+        use_docker = sys.argv[1]
+        setup_dependencies(use_docker)
+    except IndexError as e:
+        print(f"There was an issue with the use_docker variable. {e}")
+        sys.exit(1)
+    print(SUCCESS + "Project initialized, keep up the good work!" + TERMINATOR)
+
+
+if __name__ == "__main__":
+    main()

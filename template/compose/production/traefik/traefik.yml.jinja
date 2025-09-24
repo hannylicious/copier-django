@@ -14,7 +14,7 @@ entryPoints:
   web-secure:
     # https
     address: ':443'
-  {%- if use_celery == 'y' %}
+  {%- if use_celery %}
 
   flower:
     address: ':5555'
@@ -46,7 +46,7 @@ http:
       tls:
         # https://doc.traefik.io/traefik/routing/routers/#certresolver
         certResolver: letsencrypt
-    {%- if use_celery == 'y' %}
+    {%- if use_celery %}
 
     flower-secure-router:
       rule: 'Host(`{{ domain_name }}`)'
@@ -86,7 +86,7 @@ http:
       loadBalancer:
         servers:
           - url: http://django:5000
-    {%- if use_celery == 'y' %}
+    {%- if use_celery %}
 
     flower:
       loadBalancer:

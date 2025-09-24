@@ -1,28 +1,28 @@
 python-slugify==8.0.4  # https://github.com/un33k/python-slugify
 Pillow==11.3.0 # pyup: != 11.2.0  # https://github.com/python-pillow/Pillow
 {%- if frontend_pipeline == 'Django Compressor' %}
-{%- if windows == 'y' and use_docker == 'n' %}
+{%- if windows and not use_docker %}
 rcssmin==1.1.2 --install-option="--without-c-extensions"  # https://github.com/ndparker/rcssmin
 {%- else %}
 rcssmin==1.1.2  # https://github.com/ndparker/rcssmin
 {%- endif %}
 {%- endif %}
 argon2-cffi==25.1.0  # https://github.com/hynek/argon2_cffi
-{%- if use_whitenoise == 'y' %}
+{%- if use_whitenoise %}
 whitenoise==6.10.0  # https://github.com/evansd/whitenoise
 {%- endif %}
 redis==6.4.0  # https://github.com/redis/redis-py
-{%- if use_docker == "y" or windows == "n" %}
+{%- if use_docker or not windows %}
 hiredis==3.2.1  # https://github.com/redis/hiredis-py
 {%- endif %}
-{%- if use_celery == "y" %}
+{%- if use_celery %}
 celery==5.5.3  # pyup: < 6.0  # https://github.com/celery/celery
 django-celery-beat==2.8.1  # https://github.com/celery/django-celery-beat
-{%- if use_docker == 'y' %}
+{%- if use_docker %}
 flower==2.0.1  # https://github.com/mher/flower
 {%- endif %}
 {%- endif %}
-{%- if use_async == 'y' %}
+{%- if use_async %}
 uvicorn[standard]==0.35.0  # https://github.com/encode/uvicorn
 uvicorn-worker==0.3.0  # https://github.com/Kludex/uvicorn-worker
 {%- endif %}
@@ -39,13 +39,17 @@ crispy-bootstrap5==2025.6  # https://github.com/django-crispy-forms/crispy-boots
 django-compressor==4.5.1  # https://github.com/django-compressor/django-compressor
 {%- endif %}
 django-redis==6.0.0  # https://github.com/jazzband/django-redis
-{%- if use_drf == 'y' %}
+{%- if use_drf %}
 # Django REST Framework
 djangorestframework==3.16.1  # https://github.com/encode/django-rest-framework
 django-cors-headers==4.8.0  # https://github.com/adamchainz/django-cors-headers
 # DRF-spectacular for api documentation
 drf-spectacular==0.28.0  # https://github.com/tfranzel/drf-spectacular
 {%- endif %}
+{% if use_django_ninja %}
+# Django Ninja
+django-ninja==1.4.3  # https://github.com/vitalik/django-ninja
+{% endif %}
 {%- if frontend_pipeline == 'Webpack' %}
 django-webpack-loader==3.2.1  # https://github.com/django-webpack/django-webpack-loader
 {%- endif %}

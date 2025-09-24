@@ -26,7 +26,7 @@ warn_redundant_casts = true
 warn_unused_configs = true
 plugins = [
     "mypy_django_plugin.main",
-    {%- if use_drf == "y" %}
+    {%- if use_drf %}
     "mypy_drf_plugin.main",
     {%- endif %}
 ]
