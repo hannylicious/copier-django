@@ -21,7 +21,8 @@ from {{project_slug}}.users.api.views import users_router
 api = NinjaAPI(
     title="{{ project_name }} API",
     version="1.0.0",
-    auth=django_auth
+    auth=django_auth,
+    docs_url="/docs"
 )
 
 api.add_router("/users/", users_router, tags=["users"])
