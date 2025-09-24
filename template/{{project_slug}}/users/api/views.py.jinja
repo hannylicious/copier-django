@@ -54,14 +54,14 @@ class UserSchema(Schema):
 def list_users(request):
     return [request.user]
 
+@users_router.get("/me/", response=UserSchema)
+def get_me(request):
+    return request.user
+
 @users_router.get("/{user_id}/", response=UserSchema)
 def get_user(request, user_id: int):
     if user_id != request.user.id:
         return {"error": "Permission denied."}
-    return request.user
-
-@users_router.get("/me/", response=UserSchema)
-def get_me(request):
     return request.user
 {%- endif %}
 
