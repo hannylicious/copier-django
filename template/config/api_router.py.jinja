@@ -1,4 +1,4 @@
-{% if use_drf %}
+{%- if use_drf %}
 from django.conf import settings
 from rest_framework.routers import DefaultRouter
 from rest_framework.routers import SimpleRouter
@@ -12,9 +12,8 @@ router.register("users", UserViewSet)
 
 app_name = "api"
 urlpatterns = router.urls
-{% endif %}
-
-{% if use_django_ninja %}
+{%- endif %}
+{%- if use_django_ninja %}
 from ninja import NinjaAPI
 from ninja.security import django_auth
 from {{project_slug}}.users.api.views import users_router
