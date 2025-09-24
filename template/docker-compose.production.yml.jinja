@@ -62,10 +62,10 @@ services:
     volumes:
       - production_traefik:/etc/traefik/acme
     ports:
-      - '0.0.0.0:80:80'
-      - '0.0.0.0:443:443'
+      - '80:80'
+      - '443:443'
       {%- if use_celery %}
-      - '0.0.0.0:5555:5555'
+      - '5555:5555'
       {%- endif %}
 
   redis:
