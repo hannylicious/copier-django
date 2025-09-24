@@ -198,11 +198,12 @@ postgresql_version:
   help: Select the PostgreSQL version for your project.
 cloud_provider:
   type: str
+  default: "None"
   choices:
+    - "None"
     - "AWS"
     - "GCP"
     - "Azure"
-    - "None"
   help: >
     Choose your cloud provider.
     {% if cloud_provider == "None" and not use_docker %}
@@ -227,6 +228,7 @@ mail_service:
     Select a mail service for your project.
 frontend_pipeline:
   type: str
+  default: "None"
   choices:
     - "None"
     - "Django Compressor"
@@ -245,6 +247,7 @@ use_django_ninja:
   type: bool
   default: false
   help: Include Django Ninja?
+  when: "{{ use_drf != true }}"
 use_celery:
   type: bool
   default: false
@@ -269,6 +272,7 @@ use_whitenoise:
     {% endif %}
 editor:
   type: str
+  default: "None"
   choices:
     - "None"
     - "PyCharm"
@@ -276,11 +280,12 @@ editor:
   help: Which code editor do you use?
 ci_tool:
   type: str
+  default: "None"
   choices:
     - "None"
-    - "Travis"
-    - "Gitlab"
     - "Github"
+    - "Gitlab"
+    - "Travis"
     - "Drone"
   help: Which continuous integration tool do you prefer?
 use_heroku:
