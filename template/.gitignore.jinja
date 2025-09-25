@@ -59,7 +59,7 @@ docs/_build/
 # PyBuilder
 target/
 
-{% if use_celery == 'y' -%}
+{% if use_celery -%}
 # celery beat schedule file
 celerybeat-schedule
 {%- endif %}
@@ -72,7 +72,7 @@ ENV/
 # .envs unless keep_local_envs_in_vcs
 .env
 .envs/*
-{% if keep_local_envs_in_vcs != 'y' -%}
+{% if keep_local_envs_in_vcs -%}
 !.envs/.local/
 {% endif %}
 
@@ -334,14 +334,14 @@ tags
 dump.rdb
 
 ### Project template
-{%- if use_mailpit == 'y' and use_docker == 'n' %}
+{%- if use_mailpit and not use_docker %}
 mailpit
 {%- endif %}
 {{ project_slug }}/media/
 
 .pytest_cache/
 
-{%- if use_docker == 'y' %}
+{%- if use_docker %}
 .ipython/
 {%- endif %}
 

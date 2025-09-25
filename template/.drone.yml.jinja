@@ -6,7 +6,7 @@ environment:
   POSTGRES_PASSWORD: ''
   POSTGRES_DB: 'test_{{ project_slug }}'
   POSTGRES_HOST_AUTH_METHOD: trust
-  {%- if use_celery == 'y' %}
+  {%- if use_celery %}
   REDIS_URL: 'redis://redis:6379/0'
   {%- endif %}
 
@@ -26,7 +26,7 @@ steps:
 
 - name: test
   pull: if-not-exists
-  {%- if use_docker == 'y' %}
+  {%- if use_docker %}
   image: docker:25.0
   environment:
     DATABASE_URL: pgsql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres/$POSTGRES_DB
