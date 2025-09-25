@@ -7,7 +7,7 @@ variables:
   POSTGRES_PASSWORD: ''
   POSTGRES_DB: 'test_{{ project_slug }}'
   POSTGRES_HOST_AUTH_METHOD: trust
-  {%- if use_celery == 'y' %}
+  {%- if use_celery %}
   REDIS_URL: 'redis://redis:6379/0'
   {%- endif %}
 
@@ -26,7 +26,7 @@ precommit:
 
 pytest:
   stage: test
-  {%- if use_docker == 'y' %}
+  {%- if use_docker %}
   image: docker:25.0
   services:
     - docker:dind
