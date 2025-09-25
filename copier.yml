@@ -10,9 +10,7 @@ _secret_questions:
 _subdirectory: template
 _tasks:
   # Set Flags
-  - "{{_copier_python}} scripts/set_flags.py"
-  # Setup Dependencies
-  - "{{_copier_python}} scripts/setup_dependencies.py {{use_docker}}"
+  - "EXECUTED_BY_COPIER=1 {{_copier_python}} scripts/set_flags.py"
   # Remove scripts directory
   - "rm -rf scripts"
 _exclude:

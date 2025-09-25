@@ -1,6 +1,8 @@
 # ruff: noqa: PLR0133
+import os
 import random
 import string
+import sys
 from pathlib import Path
 
 try:
@@ -171,5 +173,8 @@ def main():  # noqa: C901, PLR0912, PLR0915
 
 
 if __name__ == "__main__":
-    main()
+    executed_by_copier = os.getenv("EXECUTED_BY_COPIER", False)
+    if not executed_by_copier:
+        sys.exit("This script is intended to be run only by copier.")
 
+    main()
