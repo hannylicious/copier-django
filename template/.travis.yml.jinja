@@ -5,7 +5,7 @@ python:
   - "3.12"
 
 services:
-  - {% if use_docker == 'y' %}docker{% else %}postgresql{% endif %}
+  - {% if use_docker %}docker{% else %}postgresql{% endif %}
 jobs:
   include:
     - name: "Linter"
@@ -15,7 +15,7 @@ jobs:
         - ruff check .
 
     - name: "Django Test"
-    {%- if use_docker == 'y' %}
+    {%- if use_docker %}
       before_script:
         - docker compose -v
         - docker -v
