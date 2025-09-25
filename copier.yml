@@ -5,8 +5,6 @@
 _jinja_extensions:
   - jinja2_time.TimeExtension
 _min_copier_version: "9.10.0"
-_secret_questions:
-  - django_secret_key
 _subdirectory: template
 _exclude:
   # CODE EDITORS
