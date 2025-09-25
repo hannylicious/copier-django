@@ -6,7 +6,7 @@
         <option name="services">
           <list>
             <option value="django"/>
-            {%- if use_celery == 'y' %}
+            {%- if use_celery %}
             <option value="celeryworker"/>
             <option value="celerybeat"/>
             {%- endif %}
