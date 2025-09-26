@@ -2,8 +2,8 @@
 # ------------------------------------------------------------------------------
 # DJANGO_READ_DOT_ENV_FILE=True
 DJANGO_SETTINGS_MODULE=config.settings.production
-DJANGO_SECRET_KEY={{secret_key}}
-DJANGO_ADMIN_URL={{admin_url}}
+DJANGO_SECRET_KEY=!!!SET DJANGO SECRET KEY!!!
+DJANGO_ADMIN_URL=!!!SET DJANGO ADMIN URL!!!
 DJANGO_ALLOWED_HOSTS=.{{ domain_name }}
 
 # Security
@@ -72,6 +72,6 @@ REDIS_URL=redis://redis:6379/0
 # ------------------------------------------------------------------------------
 
 # Flower
-CELERY_FLOWER_USER={{ celery_flower_user }}
-CELERY_FLOWER_PASSWORD={{ celery_flower_password }}
+CELERY_FLOWER_USER=!!!SET CELERY FLOWER USER!!!
+CELERY_FLOWER_PASSWORD=!!!SET CELERY FLOWER PASSWORD!!!
 {% endif %}
