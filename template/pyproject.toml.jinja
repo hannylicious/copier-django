@@ -40,8 +40,6 @@ dependencies = [
     "uvicorn[standard]==0.35.0",  # https://github.com/encode/uvicorn
     "uvicorn-worker==0.3.0",  # https://github.com/Kludex/uvicorn-worker
     {%- endif %}
-
-    # Django
     "django==5.2.6",  # pyup: < 6.0  # https://www.djangoproject.com/
     "django-environ==0.12.0",  # https://github.com/joke2k/django-environ
     "django-model-utils==5.0.0",  # https://github.com/jazzband/django-model-utils
@@ -53,14 +51,11 @@ dependencies = [
     {%- endif %}
     "django-redis==6.0.0",  # https://github.com/jazzband/django-redis
     {%- if use_drf %}
-    # Django REST Framework
     "djangorestframework==3.16.1",  # https://github.com/encode/django-rest-framework
     "django-cors-headers==4.8.0",  # https://github.com/adamchainz/django-cors-headers
-    # DRF-spectacular for api documentation
     "drf-spectacular==0.28.0",  # https://github.com/tfranzel/drf-spectacular
     {%- endif %}
     {% if use_django_ninja %}
-    # Django Ninja
     "django-ninja==1.4.3",  # https://github.com/vitalik/django-ninja
     {% endif %}
     {%- if frontend_pipeline == 'Webpack' %}
@@ -82,8 +77,6 @@ local = [
     {%- if use_async or use_celery %}
     "watchfiles==1.1.0",  # https://github.com/samuelcolvin/watchfiles
     {%- endif %}
-
-    # Testing
     "mypy==1.17.1",  # https://github.com/python/mypy
     "django-stubs[compatible-mypy]==5.2.5",  # https://github.com/typeddjango/django-stubs
     "pytest==8.4.2",  # https://github.com/pytest-dev/pytest
@@ -91,18 +84,12 @@ local = [
     {%- if use_drf %}
     "djangorestframework-stubs==3.16.0",  # https://github.com/typeddjango/djangorestframework-stubs
     {%- endif %}
-
-    # Documentation
     "sphinx==8.2.3",  # pyup: != 8.3.0  # https://github.com/sphinx-doc/sphinx
     "sphinx-autobuild==2025.8.25",  # https://github.com/GaretJax/sphinx-autobuild
-
-    # Code quality
     "ruff==0.13.0",  # https://github.com/astral-sh/ruff
     "coverage==7.10.6",  # https://github.com/nedbat/coveragepy
     "djlint==1.36.4",  # https://github.com/Riverside-Healthcare/djLint
     "pre-commit==4.3.0",  # https://github.com/pre-commit/pre-commit
-
-    # Django
     "factory-boy==3.3.2",  # https://github.com/FactoryBoy/factory_boy
     "django-debug-toolbar==6.0.0",  # https://github.com/jazzband/django-debug-toolbar
     "django-extensions==4.1",  # https://github.com/django-extensions/django-extensions
@@ -123,8 +110,6 @@ production = [
     {%- if not use_docker and windows %}
     "hiredis==3.2.1",  # https://github.com/redis/hiredis-py
     {%- endif %}
-
-    # Django
     {%- if cloud_provider == 'AWS' %}
     "django-storages[s3]==1.14.6",  # https://github.com/jschneier/django-storages
     {%- elif cloud_provider == 'GCP' %}
