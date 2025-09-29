@@ -296,10 +296,6 @@ keep_local_envs_in_vcs:
       Heroku support is enabled so keeping them does not make sense
       given your current setup.
     {% endif %}
-debug:
-  type: bool
-  default: false
-  help: Enable debug mode by default?
 
 secret_key:
   type: str
@@ -313,20 +309,20 @@ admin_url:
 
 postgres_user:
   type: str
-  default: "{% if debug %}debug{% else %}{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'postgres') | hash('sha256') | truncate(20, True, '') }}{% endif %}"
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'postgres') | hash('sha256') | truncate(20, True, '') }}"
   help: "Postgres User (this is suitable only for development, please change in production):"
 
 postgres_password:
   type: str
-  default: "{% if debug %}debug{% else %}{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'pgpass') | hash('sha256') }}{% endif %}"
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'pgpass') | hash('sha256') }}"
   help: "Postgres Password (this is suitable only for development, please change in production):"
 
 celery_flower_user:
   type: str
-  default: "{% if debug %}debug{% else %}{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flower') | hash('sha256') | truncate(20, True, '') }}{% endif %}"
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flower') | hash('sha256') | truncate(20, True, '') }}"
   help: "Celery Flower User (this is suitable only for development, please change in production):"
 
 celery_flower_password:
   type: str
-  default: "{% if debug %}debug{% else %}{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flowerpass') | hash('sha256') }}{% endif %}"
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flowerpass') | hash('sha256') }}"
   help: "Celery Flower Password (this is suitable only for development, please change in production):"
