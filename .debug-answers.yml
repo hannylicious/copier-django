@@ -1,0 +1,37 @@
+# Changes here will be overwritten by Copier
+_commit: c0368f4
+_src_path: copier-django
+admin_url: admin_debug/
+allow_commits_to_main: false
+author_name: John Doe
+celery_flower_password: debug
+celery_flower_user: debug
+ci_tool: None
+cloud_provider: None
+description: Welcome To Debug Project!
+domain_name: example.com
+editor: None
+email: john-doe@example.com
+frontend_pipeline: None
+keep_local_envs_in_vcs: false
+mail_service: Mailgun
+open_source_license: MIT
+postgres_password: debug
+postgres_user: debug
+postgresql_version: "17"
+project_name: Debug Project
+project_slug: debug_project
+secret_key: debug_secret_key
+timezone: America/Chicago
+use_async: false
+use_celery: false
+use_django_ninja: false
+use_docker: true
+use_drf: false
+use_heroku: false
+use_mailpit: true
+use_sentry: true
+use_whitenoise: true
+username_type: username
+version: 0.1.0
+windows: false

@@ -5,16 +5,7 @@
 _jinja_extensions:
   - jinja2_time.TimeExtension
 _min_copier_version: "9.10.0"
-_secret_questions:
-  - django_secret_key
 _subdirectory: template
-_tasks:
-  # Set Flags
-  - "{{_copier_python}} scripts/set_flags.py"
-  # Setup Dependencies
-  - "{{_copier_python}} scripts/setup_dependencies.py {{use_docker}}"
-  # Remove scripts directory
-  - "rm -rf scripts"
 _exclude:
   # CODE EDITORS
   # Include 'defaults' for PyCharm IDE
@@ -101,6 +92,11 @@ _exclude:
 # GENERAL
 # ---
 
+initial_run:
+  type: bool
+  default: "{{ _copier_answers.project_name is not defined }}"
+  when: false
+  secret: true
 project_name:
   type: str
   default: "My Project"
@@ -129,11 +125,6 @@ author_name:
     {% if "\\" in author_name %}
       Please do not use backslashes in the author name.
     {% endif %}
-django_secret_key:
-  type: str
-  default: "!!!change_this_secret_key!!!"
-  help: The secret key for Django
-  secret: true
 domain_name:
   type: str
   default: "example.com"
@@ -173,6 +164,7 @@ open_source_license:
   help: Choose a license for your project.
 username_type:
   type: str
+  default: "username"
   choices:
     - "username"
     - "email"
@@ -304,7 +296,33 @@ keep_local_envs_in_vcs:
       Heroku support is enabled so keeping them does not make sense
       given your current setup.
     {% endif %}
-debug:
-  type: bool
-  default: false
-  help: Enable debug mode by default?
+
+secret_key:
+  type: str
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'secret') | hash('sha256') | truncate(50, True, '') }}"
+  help: "Django Secret Key (this is suitable only for development, please change in production):"
+
+admin_url:
+  type: str
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'admin') | hash('md5') | truncate(32, True, '') }}/"
+  help: "Admin URL (this is suitable only for development, please change in production):"
+
+postgres_user:
+  type: str
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'postgres') | hash('sha256') | truncate(20, True, '') }}"
+  help: "Postgres User (this is suitable only for development, please change in production):"
+
+postgres_password:
+  type: str
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'pgpass') | hash('sha256') }}"
+  help: "Postgres Password (this is suitable only for development, please change in production):"
+
+celery_flower_user:
+  type: str
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flower') | hash('sha256') | truncate(20, True, '') }}"
+  help: "Celery Flower User (this is suitable only for development, please change in production):"
+
+celery_flower_password:
+  type: str
+  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flowerpass') | hash('sha256') }}"
+  help: "Celery Flower Password (this is suitable only for development, please change in production):"
