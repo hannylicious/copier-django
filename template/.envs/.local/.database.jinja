@@ -1,0 +1,24 @@
+{% if database == 'PostgreSQL' %}
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB={{ project_slug }}
+POSTGRES_USER={{ database_user }}
+POSTGRES_PASSWORD={{ database_password }}
+{% elif database == 'Microsoft SQL' %}
+# MSSQL
+# ------------------------------------------------------------------------------
+MSSQL_HOST=mssql
+MSSQL_PORT=1433
+MSSQL_DB={{ project_slug }}
+MSSQL_USER={{ database_user }}
+MSSQL_PASSWORD={{ database_password }}
+{% elif database == 'SQLite' %}
+# SQLITE
+# ------------------------------------------------------------------------------
+SQLITE_HOST=sqlite
+SQLITE_DB={{ project_slug }}
+SQLITE_USER={{ database_user }}
+SQLITE_PASSWORD={{ database_password }}
+{% endif %}

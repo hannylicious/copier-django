@@ -23,7 +23,7 @@ services:
       - .:/app:z
     env_file:
       - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
+      - ./.envs/.local/.database
     ports:
       - '8000:8000'
     command: /start
@@ -38,7 +38,7 @@ services:
       - {{ project_slug }}_local_postgres_data:/var/lib/postgresql/data
       - {{ project_slug }}_local_postgres_data_backups:/backups
     env_file:
-      - ./.envs/.local/.postgres
+      - ./.envs/.local/.database
 
   {%- if use_mailpit %}
 
