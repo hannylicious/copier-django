@@ -181,14 +181,31 @@ use_docker:
   type: bool
   default: true
   help: Use Docker for development and deployment?
+database:
+  type: str
+  choices:
+    - "Postgresql"
+    - "Microsoft SQL"
+    - "SQLite"
+  help: Select the database type you would prefer.
 postgresql_version:
   type: str
   choices:
+    - "18"
     - "17"
     - "16"
     - "15"
     - "14"
   help: Select the PostgreSQL version for your project.
+  when: "{% if database == 'Postgresql' %}True{% else %}False{% endif %}"
+mssql_version:
+  type: str
+  choices:
+    - "2022"
+    - "2019"
+    - "2017"
+  help: Select the Microsoft SQL version for your project.
+  when: "{% if database == 'Microsoft SQL' %}True{% else %}False{% endif %}"
 cloud_provider:
   type: str
   default: "None"
@@ -307,15 +324,15 @@ admin_url:
   default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'admin') | hash('md5') | truncate(32, True, '') }}/"
   help: "Admin URL (this is suitable only for development, please change in production):"
 
-postgres_user:
+database_user:
   type: str
   default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'postgres') | hash('sha256') | truncate(20, True, '') }}"
-  help: "Postgres User (this is suitable only for development, please change in production):"
+  help: "Database User (this is suitable only for development, please change in production):"
 
-postgres_password:
+database_password:
   type: str
   default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'pgpass') | hash('sha256') }}"
-  help: "Postgres Password (this is suitable only for development, please change in production):"
+  help: "Database Password (this is suitable only for development, please change in production):"
 
 celery_flower_user:
   type: str
