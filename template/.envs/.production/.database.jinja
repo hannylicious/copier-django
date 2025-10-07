@@ -1,4 +1,4 @@
-{% if database == 'PostgreSQL' %}
+{% if database == 'Postgresql' %}
 # PostgreSQL
 # ------------------------------------------------------------------------------
 POSTGRES_HOST=postgres
@@ -9,6 +9,8 @@ POSTGRES_PASSWORD=!!!CHANGE_DB_PASSWORD!!!
 {% elif database == 'Microsoft SQL' %}
 # MSSQL
 # ------------------------------------------------------------------------------
+ACCEPT_EULA=Y
+MSSQL_SA_PASSWORD=!!!CHANGE_DB_SA_PASSWORD!!!
 MSSQL_HOST=mssql
 MSSQL_PORT=1433
 MSSQL_DB={{ project_slug }}
