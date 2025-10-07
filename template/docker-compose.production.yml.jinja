@@ -1,6 +1,10 @@
 volumes:
+  {% if database == 'Postgresql' %}
   production_postgres_data: {}
   production_postgres_data_backups: {}
+  {% elif database == 'Microsoft SQL' %}
+  production_mssql_data: {}
+  {% endif %}
   production_traefik: {}
   {%- if cloud_provider == 'None' %}
   production_django_media: {}
@@ -8,7 +12,6 @@ volumes:
   {% if use_celery %}
   production_redis_data: {}
   {% endif %}
-
 
 services:
   django:{% if use_celery %} &django{% endif %}
@@ -34,23 +37,53 @@ services:
       - production_django_media:/app/{{ project_slug }}/media
     {%- endif %}
     depends_on:
-      - postgres
-      - redis
+      {%- if database == 'Postgresql' %}
+      postgres:
+        condition: service_healthy
+      {%- elif database == 'Microsoft SQL' %}
+      mssql:
+        condition: service_healthy
+      {%- endif %}
+      redis:
+        condition: service_started
     env_file:
       - ./.envs/.production/.django
       - ./.envs/.production/.database
     command: /start
 
+  {% if database == 'Postgresql' %}
   postgres:
     build:
       context: .
       dockerfile: ./compose/production/postgres/Dockerfile
     image: {{ project_slug }}_production_postgres
     volumes:
-      - production_postgres_data:/var/lib/postgresql/data
+      - production_postgres_data:/var/lib/postgresql{% if postgresql_version < 18 %}/data{% endif %}
       - production_postgres_data_backups:/backups
     env_file:
       - ./.envs/.production/.database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 30s
+      retries: 6
+      start_period: 30s
+
+  {% elif database == 'Microsoft SQL' %}
+  mssql:
+    image: mcr.microsoft.com/mssql/server:{{mssql_version}}-latest
+    volumes:
+      - production_mssql_data:/var/opt/mssql
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $$MSSQL_PASSWORD -C -Q 'SELECT 1'" ]
+      interval: 10s
+      timeout: 30s
+      retries: 6
+      start_period: 30s
+    env_file:
+      - ./.envs/.production/.database
+
+  {% endif %}
 
   traefik:
     build:
@@ -58,7 +91,8 @@ services:
       dockerfile: ./compose/production/traefik/Dockerfile
     image: {{ project_slug }}_production_traefik
     depends_on:
-      - django
+      django:
+        condition: service_started
     volumes:
       - production_traefik:/etc/traefik/acme
     ports:
@@ -112,7 +146,8 @@ services:
       dockerfile: ./compose/production/nginx/Dockerfile
     image: {{ project_slug }}_production_nginx
     depends_on:
-      - django
+      django:
+        condition: service_started
     volumes:
       - production_django_media:/usr/share/nginx/media:ro
   {%- endif %}

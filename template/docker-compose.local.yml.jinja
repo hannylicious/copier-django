@@ -1,6 +1,10 @@
 volumes:
+  {% if database == 'Postgresql' %}
   {{ project_slug }}_local_postgres_data: {}
   {{ project_slug }}_local_postgres_data_backups: {}
+  {% elif database == 'Microsoft SQL' %}
+  {{ project_slug }}_local_mssql_data: {}
+  {% endif %}
   {% if use_celery %}{{ project_slug }}_local_redis_data: {}{% endif %}
 
 services:
@@ -11,12 +15,20 @@ services:
     image: {{ project_slug }}_local_django
     container_name: {{ project_slug }}_local_django
     depends_on:
-      - postgres
+      {%- if database == 'Postgresql' %}
+      postgres:
+        condition: service_healthy
+      {%- elif database == 'Microsoft SQL' %}
+      mssql:
+        condition: service_healthy
+      {%- endif %}
       {%- if use_celery %}
-      - redis
+      redis:
+        condition: service_started
       {%- endif %}
       {%- if use_mailpit %}
-      - mailpit
+      mailpit:
+        condition: service_started
       {%- endif %}
     volumes:
       - /app/.venv
@@ -28,6 +40,7 @@ services:
       - '8000:8000'
     command: /start
 
+  {% if database == 'Postgresql' %}
   postgres:
     build:
       context: .
@@ -35,11 +48,33 @@ services:
     image: {{ project_slug }}_production_postgres
     container_name: {{ project_slug }}_local_postgres
     volumes:
-      - {{ project_slug }}_local_postgres_data:/var/lib/postgresql/data
+      - {{ project_slug }}_local_postgres_data:/var/lib/postgresql{% if postgresql_version < 18 %}/data{% endif %}
       - {{ project_slug }}_local_postgres_data_backups:/backups
     env_file:
       - ./.envs/.local/.database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
+  {% elif database == 'Microsoft SQL' %}
+  mssql:
+    image: mcr.microsoft.com/mssql/server:{{mssql_version}}-latest
+    container_name: {{ project_slug }}_local_mssql
+    volumes:
+      - {{ project_slug }}_local_mssql_data:/var/opt/mssql
+    env_file:
+      - ./.envs/.local/.database
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $$MSSQL_PASSWORD -C -Q 'SELECT 1'" ]
+      interval: 10s
+      timeout: 30s
+      retries: 6
+      start_period: 30s
+
+  {% endif %}
   {%- if use_mailpit %}
 
   mailpit:
@@ -62,10 +97,18 @@ services:
     image: {{ project_slug }}_local_celeryworker
     container_name: {{ project_slug }}_local_celeryworker
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_started
+      {%- if database == 'Postgresql' %}
+      postgres:
+        condition: service_healthy
+      {%- elif database == 'Microsoft SQL' %}
+      mssql:
+        condition: service_healthy
+      {%- endif %}
       {%- if use_mailpit %}
-      - mailpit
+      mailpit:
+        condition: service_started
       {%- endif %}
     ports: []
     command: /start-celeryworker
@@ -75,10 +118,18 @@ services:
     image: {{ project_slug }}_local_celerybeat
     container_name: {{ project_slug }}_local_celerybeat
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_started
+      {%- if database == 'Postgresql' %}
+      postgres:
+        condition: service_healthy
+      {%- elif database == 'Microsoft SQL' %}
+      mssql:
+        condition: service_healthy
+      {%- endif %}
       {%- if use_mailpit %}
-      - mailpit
+      mailpit:
+        condition: service_started
       {%- endif %}
     ports: []
     command: /start-celerybeat
@@ -101,7 +152,8 @@ services:
     image: {{ project_slug }}_local_node
     container_name: {{ project_slug }}_local_node
     depends_on:
-      - django
+      django:
+        condition: service_started
     volumes:
       - .:/app:z
       # http://jdlm.info/articles/2016/03/06/lessons-building-node-app-docker.html
