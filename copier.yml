@@ -115,7 +115,7 @@ project_slug:
     {% endif %}
 description:
   type: str
-  default: "Welcome To My Project!"
+  default: "Welcome To {{ project_name }}!"
   help: A short description of the project.
 author_name:
   type: str
@@ -127,7 +127,7 @@ author_name:
     {% endif %}
 domain_name:
   type: str
-  default: "example.com"
+  default: "{{ project_slug}}.com"
   help: The domain name for the project.
   validator: >-
     {% if domain_name != domain_name.strip() %}
@@ -189,21 +189,20 @@ database:
     - "SQLite"
   help: Select the database type you would prefer.
 postgresql_version:
-  type: str
+  type: int
   choices:
-    - "18"
-    - "17"
-    - "16"
-    - "15"
-    - "14"
+    - 18
+    - 17
+    - 16
+    - 15
+    - 14
   help: Select the PostgreSQL version for your project.
   when: "{% if database == 'Postgresql' %}True{% else %}False{% endif %}"
 mssql_version:
-  type: str
+  type: int
   choices:
-    - "2022"
-    - "2019"
-    - "2017"
+    - 2022
+    - 2019
   help: Select the Microsoft SQL version for your project.
   when: "{% if database == 'Microsoft SQL' %}True{% else %}False{% endif %}"
 cloud_provider:
@@ -326,20 +325,22 @@ admin_url:
 
 database_user:
   type: str
-  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'postgres') | hash('sha256') | truncate(20, True, '') }}"
+  default: "user_{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'dbuser') | hash('sha256') | truncate(20, True, '') }}"
   help: "Database User (this is suitable only for development, please change in production):"
 
 database_password:
   type: str
-  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'pgpass') | hash('sha256') }}"
+  default: "{{ ((project_name + '%Y%m%d%H%M%S%f' | strftime + 'dbpass') | hash('sha256') | b64encode)[:30] }}"
   help: "Database Password (this is suitable only for development, please change in production):"
 
 celery_flower_user:
   type: str
   default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flower') | hash('sha256') | truncate(20, True, '') }}"
   help: "Celery Flower User (this is suitable only for development, please change in production):"
+  when: "{{ use_celery == true }}"
 
 celery_flower_password:
   type: str
-  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flowerpass') | hash('sha256') }}"
+  default: "{{ ((project_name + '%Y%m%d%H%M%S%f' | strftime + 'flowerpass') | hash('sha256') | b64encode)[:30] }}"
   help: "Celery Flower Password (this is suitable only for development, please change in production):"
+  when: "{{ use_celery == true }}"
