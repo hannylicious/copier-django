@@ -26,7 +26,7 @@ _exclude:
   # Handles OS & Python specific dependancies
   - "{% if use_docker %}utility{% endif %}"
   # Nginx container is for hosting static media; not needed if no cloud
-  - "{% if use_docker and cloud_provider == 'none' %}compose/production/nginx{% endif %}"
+  - "{% if use_docker and cloud_provider == 'none' %}/compose/production/nginx{% endif %}"
   # AWS container is for aws specifics; not needed if not using AWS
   - "{% if use_docker and cloud_provider != 'AWS' %}/compose/production/aws{% endif %}"
   # .devcontainer is used for setting up docker environments in ide's
@@ -44,6 +44,8 @@ _exclude:
   - "{% if not use_docker and not use_heroku %}/tests{% endif %}"
   # Script to merge env files; without envs, this is not needed
   - "{% if not use_docker and not use_heroku %}merge_production_dotenvs_in_dotenv.py{% endif %}"
+  # Scripts for older versions of mssql_version
+  - "{% if not use_docker or mssql_version > 2020 %}/compose/local/mssql{% endif %}"
   # HEROKU
   # Specifies the commands that are executed by the app on startup
   - "{% if not use_heroku %}Procfile{% endif %}"
@@ -315,7 +317,7 @@ keep_local_envs_in_vcs:
 
 secret_key:
   type: str
-  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'secret') | hash('sha256') | truncate(50, True, '') }}"
+  default: "django-insecure-{{ ((range(0, 99999) | random | string + project_name + '%Y%m%d%H%M%S%f' | strftime) | hash('sha512') | b64encode)[:71] }}"
   help: "Django Secret Key (this is suitable only for development, please change in production):"
 
 admin_url:
@@ -330,7 +332,7 @@ database_user:
 
 database_password:
   type: str
-  default: "{{ ((project_name + '%Y%m%d%H%M%S%f' | strftime + 'dbpass') | hash('sha256') | b64encode)[:30] }}"
+  default: "{{ ((range(0, 99999) | random | string + project_name + '%Y%m%d%H%M%S%f' | strftime + 'dbpass') | hash('sha256') | b64encode)[:25] }}!"
   help: "Database Password (this is suitable only for development, please change in production):"
 
 celery_flower_user:
