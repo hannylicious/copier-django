@@ -63,8 +63,14 @@ services:
   mssql:
     image: mcr.microsoft.com/mssql/server:{{mssql_version}}-latest
     container_name: {{ project_slug }}_local_mssql
+    {% if mssql_version < 2020 %}
+    command: /bin/bash -c "/opt/mssql/bin/sqlservr & /usr/local/bin/init-db.sh && wait"
+    {% endif %}
     volumes:
       - {{ project_slug }}_local_mssql_data:/var/opt/mssql
+      {% if mssql_version < 2020 %}
+      - ./compose/local/mssql/init-db.sh:/usr/local/bin/init-db.sh:ro
+      {% endif %}
     env_file:
       - ./.envs/.local/.database
     healthcheck:
