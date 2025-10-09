@@ -1,31 +1,53 @@
 #!/bin/bash
-set -e
+#
+# This script executes the custom setup phase that runs after the SQL Server process has started.
+#
 
-echo "Waiting for SQL Server to be ready..."
-until /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" &>/dev/null; do
-    echo "SQL Server is unavailable - sleeping"
-    sleep 5
-done
-
-echo "SQL Server is up - executing init script"
-
-# Create database if MSSQL_DB is set
-# The essential idea for this script is originally taken from the
-# `run_custom_setup.sh` script present in 2022-latest image.
-if [ -n "$MSSQL_DB" ]; then
-    echo "Creating database $MSSQL_DB"
-    /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "CREATE DATABASE [$MSSQL_DB]"
-
-    # Create user if MSSQL_USER is set and not 'sa'
-    if [[ -n "$MSSQL_USER" && "$MSSQL_USER" != "sa" ]]; then
-        echo "Creating login $MSSQL_USER"
-        /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "
-            CREATE LOGIN [$MSSQL_USER] WITH PASSWORD = '$MSSQL_PASSWORD';
-            USE [$MSSQL_DB];
-            CREATE USER [$MSSQL_USER] FROM LOGIN [$MSSQL_USER];
-            ALTER ROLE db_owner ADD MEMBER [$MSSQL_USER];
-        "
+SQLCMD=/opt/mssql-tools18/bin/sqlcmd
+if [ ! -x $SQLCMD ]; then
+    SQLCMD=/opt/mssql-tools/bin/sqlcmd
+    if [ ! -x $SQLCMD ]; then
+        echo "sqlcmd not available at $SQLCMD, unable to execute custom setup."
+        exit 1
     fi
 fi
 
-echo "Database initialization complete"
+SQLCMD_SA="$SQLCMD -C -U sa -P $MSSQL_SA_PASSWORD"
+
+function IsSqlServerReady {
+    IS_SERVER_READY_QUERY='SET NOCOUNT ON; Select SUM(state) from sys.databases'
+    dbStatus=$($SQLCMD_SA -h -1 -Q "$IS_SERVER_READY_QUERY" 2>/dev/null)
+    errCode=$?
+    if [[ "$errCode" -eq "0" && "$dbStatus" -eq "0" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+echo "Waiting for Sql Server to be ready before executing custom setup"
+until IsSqlServerReady; do
+    sleep 5
+done
+
+if [ -n "$MSSQL_DB" ]; then
+    echo "Creating database $MSSQL_DB"
+    $SQLCMD_SA -Q "CREATE DATABASE [$MSSQL_DB]"
+
+    if [[ -n $MSSQL_USER && "$MSSQL_USER" != "sa" ]]; then
+        echo "Creating login $MSSQL_USER with password defined in MSSQL_PASSWORD environment variable"
+
+        cmd="CREATE LOGIN $MSSQL_USER WITH PASSWORD = '$MSSQL_PASSWORD';"
+        cmd+="USE $MSSQL_DB;"
+        cmd+="CREATE USER $MSSQL_USER FROM LOGIN $MSSQL_USER;"
+        cmd+="GRANT CONTROL to $MSSQL_USER;"
+        $SQLCMD_SA -Q "$cmd"
+    fi
+fi
+
+if [ -n "${MSSQL_SETUP_SCRIPTS_LOCATION}" ]; then
+    for file in $MSSQL_SETUP_SCRIPTS_LOCATION/*; do
+        echo "Executing custom setup script $file"
+        $SQLCMD_SA -i $file
+    done
+fi

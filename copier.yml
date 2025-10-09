@@ -335,6 +335,12 @@ database_password:
   default: "{{ ((range(0, 99999) | random | string + project_name + '%Y%m%d%H%M%S%f' | strftime + 'dbpass') | hash('sha256') | b64encode)[:25] }}!"
   help: "Database Password (this is suitable only for development, please change in production):"
 
+mssql_sa_password:
+  type: str
+  when: "{{ database == 'Microsoft SQL' }}"
+  default: "{{ ((range(0, 99999) | random | string + project_name + '%Y%m%d%H%M%S%f' | strftime + 'dbsapass') | hash('sha256') | b64encode)[:25] }}!"
+  help: "Database SA Password (this is suitable only for development, please change in production):"
+
 celery_flower_user:
   type: str
   default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flower') | hash('sha256') | truncate(20, True, '') }}"
