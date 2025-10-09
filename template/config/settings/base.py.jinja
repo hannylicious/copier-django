@@ -52,10 +52,17 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 DATABASES = {"default": env.db("DATABASE_URL")}
 {%- else %}
 DATABASES = {
+    {%- if database == 'Postgresql' %}
     "default": env.db(
         "DATABASE_URL",
         default="postgres://{% if windows %}localhost{% endif %}/{{project_slug}}",
     ),
+    {%- elif database == 'Microsoft SQL' %}
+    "default": env.db(
+        "DATABASE_URL",
+        default="mssql://${MSSQL_USER}:${MSSQL_PASSWORD}@${MSSQL_HOST}:${MSSQL_PORT}/${MSSQL_DB}?driver=ODBC+driver+18+for+SQL+Server&extra_params='Encrypt=yes;TrustServerCertificate=yes;'",
+    ),
+    {%- endif %}
 }
 {%- endif %}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
