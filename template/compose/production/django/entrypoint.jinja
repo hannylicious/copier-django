@@ -4,7 +4,7 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-{%- if database=='Postgresql' %}
+{%- if database == 'Postgresql' %}
 if [ -z "${POSTGRES_USER}" ]; then
     base_postgres_image_default_user='postgres'
     export POSTGRES_USER="${base_postgres_image_default_user}"
@@ -14,10 +14,10 @@ export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES
 wait-for-it "${POSTGRES_HOST}:${POSTGRES_PORT}" -t 30
 {%- elif database == 'Microsoft SQL' %}
 if [ -z "${MSSQL_USER}" ]; then
-    base_mssql_image_default_user='mssql_user'
+    base_mssql_image_default_user='sa'
     export MSSQL_USER="${base_mssql_image_default_user}"
 fi
-export DATABASE_URL="mssql://${MSSQL_USER}:${MSSQL_PASSWORD}@${MSSQL_HOST}:${MSSQL_PORT}/${MSSQL_DB}"
+export DATABASE_URL="mssql://${MSSQL_USER}:${MSSQL_PASSWORD}@${MSSQL_HOST}:${MSSQL_PORT}/${MSSQL_DB}?driver=ODBC+Driver+18+for+SQL+Server&extra_params='Encrypt=yes;TrustServerCertificate=yes;'"
 
 wait-for-it "${MSSQL_HOST}:${MSSQL_PORT}" -t 30
 {%- endif %}
