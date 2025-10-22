@@ -14,8 +14,8 @@ export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES
 wait-for-it "${POSTGRES_HOST}:${POSTGRES_PORT}" -t 30
 {%- elif database == 'Microsoft SQL' %}
 if [ -z "${MSSQL_USER}" ]; then
-    base_mssql_image_default_user='sa'
-    export MSSQL_USER="${base_mssql_image_default_user}"
+    printf "ERROR: MSSQL_USER is not set. Please set the MSSQL_USER environment variable.\n" >&2
+    exit 1
 fi
 export DATABASE_URL="mssql://${MSSQL_USER}:${MSSQL_PASSWORD}@${MSSQL_HOST}:${MSSQL_PORT}/${MSSQL_DB}?driver=ODBC+Driver+18+for+SQL+Server&extra_params='Encrypt=yes;TrustServerCertificate=yes;'"
 
