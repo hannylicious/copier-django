@@ -74,13 +74,12 @@ services:
     image: mcr.microsoft.com/mssql/server:{{mssql_version}}-latest
     volumes:
       - production_mssql_data:/var/opt/mssql
-      - production_mssql_data_backups:/backups
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $$MSSQL_SA_PASSWORD -C -Q 'SELECT 1'" ]
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U $$MSSQL_USER -P $$MSSQL_PASSWORD -C -Q 'SELECT 1'" ]
       interval: 10s
-      timeout: 30s
-      retries: 6
-      start_period: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     env_file:
       - ./.envs/.production/.database
 

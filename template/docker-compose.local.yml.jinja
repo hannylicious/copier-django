@@ -68,18 +68,17 @@ services:
     {% endif %}
     volumes:
       - {{ project_slug }}_local_mssql_data:/var/opt/mssql
-      - {{ project_slug }}_local_mssql_data_backups:/backups
       {% if mssql_version < 2020 %}
       - ./compose/local/mssql/init-db.sh:/usr/local/bin/init-db.sh:ro
       {% endif %}
     env_file:
       - ./.envs/.local/.database
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $$MSSQL_SA_PASSWORD -C -Q 'SELECT 1'" ]
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U $$MSSQL_USER -P $$MSSQL_PASSWORD -C -Q 'SELECT 1'" ]
       interval: 10s
-      timeout: 30s
-      retries: 6
-      start_period: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   {% endif %}
   {%- if use_mailpit %}
