@@ -68,6 +68,7 @@ services:
     {% endif %}
     volumes:
       - {{ project_slug }}_local_mssql_data:/var/opt/mssql
+      - {{ project_slug }}_local_mssql_data_backups:/backups
       {% if mssql_version < 2020 %}
       - ./compose/local/mssql/init-db.sh:/usr/local/bin/init-db.sh:ro
       {% endif %}
