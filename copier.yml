@@ -45,7 +45,7 @@ _exclude:
   # Script to merge env files; without envs, this is not needed
   - "{% if not use_docker and not use_heroku %}merge_production_dotenvs_in_dotenv.py{% endif %}"
   # Scripts for older versions of mssql_version
-  - "{% if not use_docker or mssql_version > 2020 %}/compose/local/mssql{% endif %}"
+  - "{% if not use_docker or mssql_version in (2022) %}/compose/local/mssql{% endif %}"
   # HEROKU
   # Specifies the commands that are executed by the app on startup
   - "{% if not use_heroku %}Procfile{% endif %}"
