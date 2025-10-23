@@ -125,23 +125,23 @@ This is the excerpt from your project's ``docker-compose.local.yml``: ::
       - local_postgres_data:/var/lib/postgresql/data
       - local_postgres_data_backups:/backups
     env_file:
-      - ./.envs/.local/.postgres
+      - ./.envs/.local/.database
 
   # ...
 
-The most important thing for us here now is ``env_file`` section enlisting ``./.envs/.local/.postgres``. Generally, the stack's behavior is governed by a number of environment variables (`env(s)`, for short) residing in ``envs/``, for instance, this is what we generate for you: ::
+The most important thing for us here now is ``env_file`` section enlisting ``./.envs/.local/.database``. Generally, the stack's behavior is governed by a number of environment variables (`env(s)`, for short) residing in ``envs/``, for instance, this is what we generate for you: ::
 
     .envs
     ├── .local
     │   ├── .django
-    │   └── .postgres
+    │   └── .database
     └── .production
         ├── .django
-        └── .postgres
+        └── .database
 
 By convention, for any service ``sI`` in environment ``e`` (you know ``someenv`` is an environment when there is a ``someenv.yml`` file in the project root), given ``sI`` requires configuration, a ``.envs/.e/.sI`` `service configuration` file exists.
 
-Consider the aforementioned ``.envs/.local/.postgres``: ::
+Consider the aforementioned ``.envs/.local/.database``: ::
 
     # PostgreSQL
     # ------------------------------------------------------------------------------

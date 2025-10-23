@@ -8,10 +8,24 @@ ARG APP_HOME=/app
 
 WORKDIR ${APP_HOME}
 
-# we need to move the virtualenv outside of the $APP_HOME directory because it will be overriden by the docker compose mount
-ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=0
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=0 {% if database == "Microsoft SQL" %}ACCEPT_EULA=Y{% endif %}
+
+{% if database == "Microsoft SQL" %}
+# Install Microsoft Package Repository
+RUN apt-get update && apt-get install --no-install-recommends -y curl && curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb && dpkg -i packages-microsoft-prod.deb && rm packages-microsoft-prod.deb
 
 # Install apt packages
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    # dependencies for building Python packages
+    build-essential \
+    # mssql dependencies
+    msodbcsql18 \
+    mssql-tools18 \
+    unixodbc-dev \
+    libgssapi-krb5-2\
+    gettext \
+    wait-for-it
+{% elif database == "Postgresql" %}
 RUN apt-get update && apt-get install --no-install-recommends -y \
     # dependencies for building Python packages
     build-essential \
@@ -19,6 +33,13 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libpq-dev \
     gettext \
     wait-for-it
+{% else %} # Django
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    # dependencies for building Python packages
+    build-essential \
+    gettext \
+    wait-for-it
+{% endif %}
 
 # Requirements are installed here to ensure they will be cached.
 RUN --mount=type=cache,target=/root/.cache/uv \

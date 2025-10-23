@@ -26,7 +26,7 @@ _exclude:
   # Handles OS & Python specific dependancies
   - "{% if use_docker %}utility{% endif %}"
   # Nginx container is for hosting static media; not needed if no cloud
-  - "{% if use_docker and cloud_provider == 'none' %}compose/production/nginx{% endif %}"
+  - "{% if use_docker and cloud_provider == 'none' %}/compose/production/nginx{% endif %}"
   # AWS container is for aws specifics; not needed if not using AWS
   - "{% if use_docker and cloud_provider != 'AWS' %}/compose/production/aws{% endif %}"
   # .devcontainer is used for setting up docker environments in ide's
@@ -44,6 +44,8 @@ _exclude:
   - "{% if not use_docker and not use_heroku %}/tests{% endif %}"
   # Script to merge env files; without envs, this is not needed
   - "{% if not use_docker and not use_heroku %}merge_production_dotenvs_in_dotenv.py{% endif %}"
+  # Scripts for older versions of mssql_version
+  - "{% if not use_docker or mssql_version in (2022) %}/compose/local/mssql{% endif %}"
   # HEROKU
   # Specifies the commands that are executed by the app on startup
   - "{% if not use_heroku %}Procfile{% endif %}"
@@ -115,7 +117,7 @@ project_slug:
     {% endif %}
 description:
   type: str
-  default: "Welcome To My Project!"
+  default: "Welcome To {{ project_name }}!"
   help: A short description of the project.
 author_name:
   type: str
@@ -127,7 +129,7 @@ author_name:
     {% endif %}
 domain_name:
   type: str
-  default: "example.com"
+  default: "{{ project_slug}}.com"
   help: The domain name for the project.
   validator: >-
     {% if domain_name != domain_name.strip() %}
@@ -181,14 +183,30 @@ use_docker:
   type: bool
   default: true
   help: Use Docker for development and deployment?
-postgresql_version:
+database:
   type: str
   choices:
-    - "17"
-    - "16"
-    - "15"
-    - "14"
+    - "Postgresql"
+    - "Microsoft SQL"
+    - "SQLite"
+  help: Select the database type you would prefer.
+postgresql_version:
+  type: int
+  choices:
+    - 18
+    - 17
+    - 16
+    - 15
+    - 14
   help: Select the PostgreSQL version for your project.
+  when: "{% if database == 'Postgresql' %}True{% else %}False{% endif %}"
+mssql_version:
+  type: int
+  choices:
+    - 2022
+    - 2019
+  help: Select the Microsoft SQL version for your project.
+  when: "{% if database == 'Microsoft SQL' %}True{% else %}False{% endif %}"
 cloud_provider:
   type: str
   default: "None"
@@ -299,7 +317,7 @@ keep_local_envs_in_vcs:
 
 secret_key:
   type: str
-  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'secret') | hash('sha256') | truncate(50, True, '') }}"
+  default: "django-insecure-{{ ((range(0, 99999) | random | string + project_name + '%Y%m%d%H%M%S%f' | strftime) | hash('sha512') | b64encode)[:71] }}"
   help: "Django Secret Key (this is suitable only for development, please change in production):"
 
 admin_url:
@@ -307,22 +325,30 @@ admin_url:
   default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'admin') | hash('md5') | truncate(32, True, '') }}/"
   help: "Admin URL (this is suitable only for development, please change in production):"
 
-postgres_user:
+database_user:
   type: str
-  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'postgres') | hash('sha256') | truncate(20, True, '') }}"
-  help: "Postgres User (this is suitable only for development, please change in production):"
+  default: "user_{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'dbuser') | hash('sha256') | truncate(20, True, '') }}"
+  help: "Database User (this is suitable only for development, please change in production):"
 
-postgres_password:
+database_password:
   type: str
-  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'pgpass') | hash('sha256') }}"
-  help: "Postgres Password (this is suitable only for development, please change in production):"
+  default: "{{ ((range(0, 99999) | random | string + project_name + '%Y%m%d%H%M%S%f' | strftime + 'dbpass') | hash('sha256') | b64encode)[:25] }}!"
+  help: "Database Password (this is suitable only for development, please change in production):"
+
+mssql_sa_password:
+  type: str
+  when: "{{ database == 'Microsoft SQL' }}"
+  default: "{{ ((range(0, 99999) | random | string + project_name + '%Y%m%d%H%M%S%f' | strftime + 'dbsapass') | hash('sha256') | b64encode)[:25] }}!"
+  help: "Database SA Password (this is suitable only for development, please change in production):"
 
 celery_flower_user:
   type: str
   default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flower') | hash('sha256') | truncate(20, True, '') }}"
   help: "Celery Flower User (this is suitable only for development, please change in production):"
+  when: "{{ use_celery == true }}"
 
 celery_flower_password:
   type: str
-  default: "{{ (project_name + '%Y%m%d%H%M%S%f' | strftime + 'flowerpass') | hash('sha256') }}"
+  default: "{{ ((project_name + '%Y%m%d%H%M%S%f' | strftime + 'flowerpass') | hash('sha256') | b64encode)[:30] }}"
   help: "Celery Flower Password (this is suitable only for development, please change in production):"
+  when: "{{ use_celery == true }}"
