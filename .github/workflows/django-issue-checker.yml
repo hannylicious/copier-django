@@ -4,8 +4,9 @@
 name: Django Issue Checker
 
 on:
-  schedule:
-    - cron: "28 5 * * *"
+  # Disabling until we understand more about this
+  # schedule:
+  #   - cron: "28 5 * * *"
   # Manual trigger
   workflow_dispatch:
 

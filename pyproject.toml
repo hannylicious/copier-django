@@ -54,7 +54,7 @@ docs = [
 target-version = "py39"
 line-length = 119
 # Exclude the template content as most files aren't parseable
-extend-exclude = ["[{]{2}project_slug[}]{2}/*", "docs/*"]
+extend-exclude = ["template/*", "docs/*"]
 
 lint.select = [
   "A",
@@ -131,7 +131,7 @@ norecursedirs = [
   "*/static/*",
   "docs",
   "venv",
-  "*/{{project_slug}}/*",
+  "*/template/*",
 ]
 
 # ==== djLint ====
